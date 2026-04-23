@@ -1,8 +1,12 @@
+"use client";
+
 import { motion } from "motion/react";
 import { useState } from "react";
 import { MapPin, Clock, Briefcase, Search } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+
+const MotionLink = motion.create(Link);
 
 export default function Careers() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -264,16 +268,15 @@ export default function Careers() {
                   </div>
 
                   <div className="lg:pl-8">
-                    <Link to="/partner-application">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors whitespace-nowrap"
-                        style={{ fontWeight: 600 }}
-                      >
-                        Apply Now
-                      </motion.button>
-                    </Link>
+                    <MotionLink
+                      href="/partner-application"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="inline-flex px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors whitespace-nowrap"
+                      style={{ fontWeight: 600 }}
+                    >
+                      Apply Now
+                    </MotionLink>
                   </div>
                 </div>
               </motion.div>

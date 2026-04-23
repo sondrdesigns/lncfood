@@ -1,11 +1,11 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
     <footer className="bg-primary text-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
@@ -23,10 +23,10 @@ export default function Footer() {
           <div>
             <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Quick Links</h3>
             <div className="space-y-2">
-              <Link to="/" className="block text-white/80 hover:text-white transition-colors">Home</Link>
-              <Link to="/about" className="block text-white/80 hover:text-white transition-colors">About Us</Link>
-              <Link to="/products" className="block text-white/80 hover:text-white transition-colors">Products</Link>
-              <Link to="/careers" className="block text-white/80 hover:text-white transition-colors">Careers</Link>
+              <Link href="/" className="block text-white/80 hover:text-white transition-colors">Home</Link>
+              <Link href="/about" className="block text-white/80 hover:text-white transition-colors">About Us</Link>
+              <Link href="/products" className="block text-white/80 hover:text-white transition-colors">Products</Link>
+              <Link href="/careers" className="block text-white/80 hover:text-white transition-colors">Careers</Link>
             </div>
           </div>
 
@@ -49,29 +49,41 @@ export default function Footer() {
           </div>
 
           <div>
+            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Legal</h3>
+            <div className="space-y-2">
+              <Link href="/privacy" className="block text-white/80 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="block text-white/80 hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/accessibility" className="block text-white/80 hover:text-white transition-colors">Accessibility</Link>
+            </div>
+          </div>
+
+          <div>
             <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Follow Us</h3>
             <div className="flex gap-3">
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                aria-label="Facebook"
+              <button
+                type="button"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
+                aria-label="Facebook (coming soon)"
+                disabled
               >
                 <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                aria-label="Instagram"
+              </button>
+              <button
+                type="button"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
+                aria-label="Instagram (coming soon)"
+                disabled
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                aria-label="LinkedIn"
+              </button>
+              <button
+                type="button"
+                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
+                aria-label="LinkedIn (coming soon)"
+                disabled
               >
                 <Linkedin className="w-5 h-5" />
-              </a>
+              </button>
             </div>
           </div>
         </div>

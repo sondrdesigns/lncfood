@@ -1,7 +1,11 @@
+"use client";
+
 import { motion } from "motion/react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight, Truck, Shield, TrendingUp, Users } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+
+const MotionLink = motion.create(Link);
 
 export default function Home() {
   const fadeInUp = {
@@ -21,7 +25,7 @@ export default function Home() {
   return (
     <div className="pt-20">
       {/* Hero Section */}
-      <section className="relative h-[90vh] min-h-[600px] flex items-center overflow-hidden">
+      <section className="relative h-screen min-h-[600px] w-full flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
             src="https://images.unsplash.com/photo-1684695749267-233af13276d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080"
@@ -55,34 +59,32 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/partner-application">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl flex items-center gap-2 transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  Partner With Us
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-              </Link>
-              <Link to="/products">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-xl transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  Browse Catalog
-                </motion.button>
-              </Link>
+              <MotionLink
+                href="/partner-application"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl inline-flex items-center gap-2 transition-colors"
+                style={{ fontWeight: 600 }}
+              >
+                Partner With Us
+                <ArrowRight className="w-5 h-5" />
+              </MotionLink>
+              <MotionLink
+                href="/products"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-xl inline-flex items-center transition-colors"
+                style={{ fontWeight: 600 }}
+              >
+                Browse Catalog
+              </MotionLink>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* About Section */}
-      <section className="py-24 bg-white">
+      <section className="min-h-screen w-full flex items-center py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
@@ -111,23 +113,22 @@ export default function Home() {
               <p className="text-lg text-foreground/70 mb-8 leading-relaxed">
                 Ready to experience the difference? Since 1995, we've been serving restaurants across California with unwavering commitment to quality and reliability.
               </p>
-              <Link to="/about">
-                <motion.button
-                  whileHover={{ x: 5 }}
-                  className="text-primary flex items-center gap-2"
-                  style={{ fontWeight: 600 }}
-                >
-                  Learn More About Us
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-              </Link>
+              <MotionLink
+                href="/about"
+                whileHover={{ x: 5 }}
+                className="text-primary inline-flex items-center gap-2"
+                style={{ fontWeight: 600 }}
+              >
+                Learn More About Us
+                <ArrowRight className="w-5 h-5" />
+              </MotionLink>
             </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="py-24 bg-secondary">
+      <section className="min-h-screen w-full flex items-center py-24 bg-secondary">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
@@ -197,7 +198,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 bg-primary text-white">
+      <section className="min-h-screen w-full flex items-center py-24 bg-primary text-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
@@ -227,7 +228,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-white">
+      <section className="min-h-screen w-full flex items-center py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
@@ -252,17 +253,16 @@ export default function Home() {
               <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
                 Join hundreds of successful restaurants across California who trust L&C Food Distribution for their supply needs.
               </p>
-              <Link to="/partner-application">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-10 py-5 bg-white text-primary rounded-xl flex items-center gap-2 mx-auto hover:bg-white/95 transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  Get Started Today
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-              </Link>
+              <MotionLink
+                href="/partner-application"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-10 py-5 bg-white text-primary rounded-xl inline-flex items-center gap-2 mx-auto w-fit hover:bg-white/95 transition-colors"
+                style={{ fontWeight: 600 }}
+              >
+                Get Started Today
+                <ArrowRight className="w-5 h-5" />
+              </MotionLink>
             </div>
           </motion.div>
         </div>

@@ -1,6 +1,9 @@
+"use client";
+
 import { motion } from "motion/react";
 import { Globe, Heart, TrendingUp, Scale, Handshake, Users as UsersIcon } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { branches } from "@/app/data/locations";
 
 export default function AboutUs() {
   const fadeInUp = {
@@ -59,28 +62,7 @@ export default function AboutUs() {
     { name: "Tokyo Express", logo: "TE" },
   ];
 
-  const locations = [
-    {
-      city: "San Diego",
-      address: "8724 Approach Rd, San Diego, CA 92154",
-      phone: "(619) 710-2030"
-    },
-    {
-      city: "Los Angeles",
-      address: "15320 Salt Lake Ave, City of Industry, CA 91745",
-      phone: "(626) 465-7855"
-    },
-    {
-      city: "Fresno",
-      address: "471 S Teilman Ave, Fresno, CA 93706",
-      phone: "(559) 264-0298"
-    },
-    {
-      city: "San Jose",
-      address: "1309 Old Bayshore Hwy, San Jose, CA 95112",
-      phone: "(408) 998-8211"
-    }
-  ];
+  const locations = branches;
 
   return (
     <div className="pt-20">
