@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "@/styles/index.css";
-import Navigation from "@/app/components/Navigation";
-import Footer from "@/app/components/Footer";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -24,6 +22,18 @@ export const metadata: Metadata = {
   },
   description:
     "L&C Food Distribution — your trusted Asian food distribution partner since 1995. Global Foods, Local Solutions.",
+  icons: {
+    icon: "/images/lnc-logo.png",
+    shortcut: "/images/lnc-logo.png",
+    apple: "/images/lnc-logo.png",
+  },
+  openGraph: {
+    title: "L&C Food Distribution",
+    description:
+      "L&C Food Distribution — your trusted Asian food distribution partner since 1995. Global Foods, Local Solutions.",
+    images: ["/images/lnc-logo.png"],
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {
@@ -39,13 +49,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
-      <body>
-        <div className="min-h-screen flex flex-col">
-          <Navigation />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

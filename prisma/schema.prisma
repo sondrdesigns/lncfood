@@ -1,0 +1,46 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Job {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  title        String
+  type         JobType
+  location     String
+  schedule     String
+  description  String    @db.Text
+  requirements String[]
+  applyUrl     String
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+  archivedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  updatedById  String?
+
+  @@index([published, archivedAt])
+}
+
+enum JobType {
+  WAREHOUSE
+  DELIVERY
+  SALES
+  ADMIN
+}
