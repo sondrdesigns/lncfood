@@ -2,8 +2,10 @@
 
 import { motion } from "motion/react";
 import Link from "next/link";
-import { ArrowRight, Truck, Shield, TrendingUp, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
+import { CountUp } from "../motion/CountUp";
+import { usePrefersReducedMotion } from "@/app/hooks/usePrefersReducedMotion";
 
 const MotionLink = motion.create(Link);
 
@@ -22,13 +24,15 @@ export default function Home() {
     }
   };
 
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
       <section className="relative h-screen min-h-[600px] w-full flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1684695749267-233af13276d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="/images/home-hero.webp"
             alt="Modern warehouse facility"
             className="w-full h-full object-cover"
           />
@@ -96,7 +100,7 @@ export default function Home() {
             <motion.div variants={fadeInUp}>
               <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1549194388-f61be84a6e9e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080"
+                  src="/images/home-about-section.webp"
                   alt="Warehouse operations"
                   className="w-full h-full object-cover"
                 />
@@ -154,22 +158,22 @@ export default function Home() {
           >
             {[
               {
-                image: "https://images.unsplash.com/photo-1598357850706-0188bc0372b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+                image: "/images/cat-fruits-vegetables.webp",
                 title: "Fresh Vegetables",
                 description: "Farm-fresh produce delivered daily to keep your menu vibrant and healthy."
               },
               {
-                image: "https://images.unsplash.com/photo-1545898073-346e42dc7357?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+                image: "/images/cat-meat-seafood.webp",
                 title: "Meat Products",
                 description: "Premium quality meats sourced from trusted suppliers for your customers."
               },
               {
-                image: "https://images.unsplash.com/photo-1564753907916-f3a2ad1b01fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+                image: "/images/cat-dry-grocery.webp",
                 title: "Dry Groceries",
                 description: "Comprehensive selection of pantry staples and specialty Asian ingredients."
               },
               {
-                image: "https://images.unsplash.com/photo-1650012048722-c81295ccbe79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+                image: "/images/cat-disposables.webp",
                 title: "Disposables",
                 description: "Complete range of food service supplies and packaging solutions."
               }
@@ -198,29 +202,42 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="min-h-screen w-full flex items-center py-24 bg-primary text-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <section className="relative w-full py-24 md:py-28 bg-primary text-white overflow-hidden">
+        {!prefersReducedMotion && (
+          <motion.div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.14),transparent_60%)]"
+            animate={{ x: [0, 60, -20, 0], y: [0, -30, 20, 0] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
             variants={stagger}
-            className="grid grid-cols-2 md:grid-cols-4 gap-12"
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
           >
             {[
-              { icon: Users, value: "500+", label: "Restaurant Partners" },
-              { icon: Truck, value: "4", label: "Distribution Centers" },
-              { icon: Shield, value: "29", label: "Years of Excellence" },
-              { icon: TrendingUp, value: "99%", label: "Client Satisfaction" }
-            ].map((stat, index) => (
+              { to: 29, suffix: "", label: "Years of Excellence" },
+              { to: 500, suffix: "+", label: "Restaurant Partners" },
+              { to: 4, suffix: "", label: "California Distribution Centers + National Network" },
+              { to: 10, suffix: "+", label: "Year Average Customer Tenure" }
+            ].map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={fadeInUp}
                 className="text-center"
               >
-                <stat.icon className="w-12 h-12 mx-auto mb-4 text-white/80" />
-                <div className="text-4xl md:text-5xl mb-2" style={{ fontWeight: 700 }}>{stat.value}</div>
-                <div className="text-white/70">{stat.label}</div>
+                <div
+                  className="mb-2 leading-none text-4xl md:text-5xl"
+                  style={{ fontWeight: 700 }}
+                >
+                  <CountUp to={stat.to} suffix={stat.suffix} />
+                </div>
+                <div className="text-white/80">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -239,7 +256,7 @@ export default function Home() {
           >
             <div className="absolute inset-0">
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1717838207789-62684e75a770?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxyZXN0YXVyYW50JTIwa2l0Y2hlbiUyMGNoZWYlMjBjb29raW5nfGVufDF8fHx8MTc3NjA1OTMwOHww&ixlib=rb-4.1.0&q=80&w=1080"
+                src="/images/home-cta-bg.webp"
                 alt="Chef cooking"
                 className="w-full h-full object-cover"
               />

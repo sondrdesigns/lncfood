@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -51,12 +52,20 @@ export default function Navigation() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <Link href="/" className="flex items-center gap-3" aria-label="L&C Food home">
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-xl">L&C</span>
-            </div>
-            <span className="text-xl" style={{ fontWeight: 600, color: "#2D5F3E" }}>
-              L&C Food
+          <Link href="/" className="flex items-center gap-3" aria-label="L&C Food Distribution home">
+            <Image
+              src="/images/lnc-logo.png"
+              alt=""
+              width={367}
+              height={315}
+              priority
+              className="h-14 w-auto"
+            />
+            <span
+              className="hidden sm:inline text-primary leading-tight tracking-tight text-lg lg:text-xl"
+              style={{ fontWeight: 700 }}
+            >
+              L&amp;C Food Distribution
             </span>
           </Link>
 

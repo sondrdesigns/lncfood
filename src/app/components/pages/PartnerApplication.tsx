@@ -4,12 +4,13 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useState } from "react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { CheckCircle2, Phone, MapPin, UtensilsCrossed, Truck, FileText, ArrowRight } from "lucide-react";
+import { CheckCircle2, Phone, MapPin, UtensilsCrossed, Truck, FileText, ArrowRight, ArrowLeft } from "lucide-react";
 import { getBranchByZip } from "@/app/lib/territory";
 import type { Branch } from "@/app/data/locations";
 
 export default function PartnerApplication() {
   const [submitted, setSubmitted] = useState(false);
+  const [hasSelectedRole, setHasSelectedRole] = useState(false);
   const [assignedBranch, setAssignedBranch] = useState<Branch | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -33,7 +34,8 @@ export default function PartnerApplication() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const branch = formData.state === "CA" ? getBranchByZip(formData.zipCode) : null;
+    const isBuyer = formData.interestType === "potential-customer";
+    const branch = isBuyer && formData.state === "CA" ? getBranchByZip(formData.zipCode) : null;
     setAssignedBranch(branch);
     setSubmitted(true);
   };
@@ -43,6 +45,14 @@ export default function PartnerApplication() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleSelectRole = (interestType: string) => {
+    setFormData((prev) => ({ ...prev, interestType }));
+    setHasSelectedRole(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   if (submitted) {
@@ -70,52 +80,54 @@ export default function PartnerApplication() {
             We've received your application and will review it shortly. Our team will reach out to you via email with your login information and next steps.
           </p>
 
-          {assignedBranch ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
-            >
-              <p className="text-sm uppercase tracking-wider text-primary mb-2" style={{ fontWeight: 600 }}>
-                Your assigned branch
-              </p>
-              <h2 className="text-2xl md:text-3xl mb-4" style={{ fontWeight: 700 }}>
-                L&amp;C {assignedBranch.city}
-              </h2>
-              <p className="text-foreground/70 mb-4">
-                Need to reach us before you hear back? Contact your local branch directly.
-              </p>
-              <div className="space-y-3">
-                <a
-                  href={`tel:${assignedBranch.phone.replace(/[^\d+]/g, "")}`}
-                  className="flex items-center gap-3 text-primary hover:underline"
-                  style={{ fontWeight: 600 }}
-                >
-                  <Phone className="w-5 h-5 flex-shrink-0" />
-                  <span>{assignedBranch.phone}</span>
-                </a>
-                <div className="flex items-start gap-3 text-foreground/70">
-                  <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                  <span>{assignedBranch.address}</span>
+          {formData.interestType === "potential-customer" && (
+            assignedBranch ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
+              >
+                <p className="text-sm uppercase tracking-wider text-primary mb-2" style={{ fontWeight: 600 }}>
+                  Your assigned branch
+                </p>
+                <h2 className="text-2xl md:text-3xl mb-4" style={{ fontWeight: 700 }}>
+                  L&amp;C {assignedBranch.city}
+                </h2>
+                <p className="text-foreground/70 mb-4">
+                  Need to reach us before you hear back? Contact your local branch directly.
+                </p>
+                <div className="space-y-3">
+                  <a
+                    href={`tel:${assignedBranch.phone.replace(/[^\d+]/g, "")}`}
+                    className="flex items-center gap-3 text-primary hover:underline"
+                    style={{ fontWeight: 600 }}
+                  >
+                    <Phone className="w-5 h-5 flex-shrink-0" />
+                    <span>{assignedBranch.phone}</span>
+                  </a>
+                  <div className="flex items-start gap-3 text-foreground/70">
+                    <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <span>{assignedBranch.address}</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
-            >
-              <p className="text-foreground/70">
-                Your location is outside our current service territory. Our team will follow up directly to discuss how we can support you — in the meantime you can reach our main line at{" "}
-                <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
-                  (626) 465-7855
-                </a>
-                .
-              </p>
-            </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
+              >
+                <p className="text-foreground/70">
+                  Your location is outside our current service territory. Our team will follow up directly to discuss how we can support you — in the meantime you can reach our main line at{" "}
+                  <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
+                    (626) 465-7855
+                  </a>
+                  .
+                </p>
+              </motion.div>
+            )
           )}
 
           {formData.interestType === "potential-customer" && (
@@ -163,7 +175,7 @@ export default function PartnerApplication() {
       <section className="relative h-[50vh] min-h-[300px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1746494557939-2d305c1c834a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxyZXN0YXVyYW50JTIwa2l0Y2hlbiUyMGNoZWYlMjBjb29raW5nfGVufDF8fHx8MTc3NjA1OTMwOHww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="/images/application-hero.webp"
             alt="Chef preparing food"
             className="w-full h-full object-cover"
           />
@@ -191,81 +203,100 @@ export default function PartnerApplication() {
         </div>
       </section>
 
-      {/* Audience Explainer Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl mb-4" style={{ fontWeight: 700 }}>
-              Which one are you?
-            </h2>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-              This form is for two kinds of people. Find the one that sounds like you.
-            </p>
-          </motion.div>
+      {/* Audience Selection Section */}
+      {!hasSelectedRole && (
+        <section className="py-16 bg-white">
+          <div className="max-w-5xl mx-auto px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl mb-4" style={{ fontWeight: 700 }}>
+                Which one are you?
+              </h2>
+              <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+                Pick the option that sounds like you and we&rsquo;ll take you to the right form.
+              </p>
+            </motion.div>
 
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeInUp}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-          >
-            <div className="bg-secondary rounded-2xl p-8 border-2 border-transparent hover:border-primary/30 transition-colors">
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
-                <UtensilsCrossed className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
-                I want to buy food
-              </h3>
-              <p className="text-foreground/70 leading-relaxed mb-4">
-                You run a restaurant, market, or food business, and you need someone to deliver fresh ingredients and Asian food products to your kitchen.
-              </p>
-              <p className="text-sm text-foreground/60">
-                Pick <span className="text-primary" style={{ fontWeight: 600 }}>Potential Customer</span> on the form below.
-              </p>
-            </div>
+            <motion.div
+              initial="initial"
+              animate="animate"
+              variants={fadeInUp}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+              <button
+                type="button"
+                onClick={() => handleSelectRole("potential-customer")}
+                className="text-left bg-secondary rounded-2xl p-8 border-2 border-transparent hover:border-primary hover:shadow-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary group"
+              >
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <UtensilsCrossed className="w-7 h-7 text-primary group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
+                  I want to buy food
+                </h3>
+                <p className="text-foreground/70 leading-relaxed mb-5">
+                  You run a restaurant, market, or food business, and you need someone to deliver fresh ingredients and Asian food products to your kitchen.
+                </p>
+                <span className="inline-flex items-center gap-2 text-primary" style={{ fontWeight: 600 }}>
+                  Continue as a buyer
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </button>
 
-            <div className="bg-secondary rounded-2xl p-8 border-2 border-transparent hover:border-primary/30 transition-colors">
-              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5">
-                <Truck className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
-                I want to sell food
-              </h3>
-              <p className="text-foreground/70 leading-relaxed mb-4">
-                You grow, make, or import food, and you want us to carry your products and deliver them to restaurants across California.
-              </p>
-              <p className="text-sm text-foreground/60">
-                Pick <span className="text-primary" style={{ fontWeight: 600 }}>Potential Vendor</span> on the form below.
-              </p>
-            </div>
-          </motion.div>
+              <button
+                type="button"
+                onClick={() => handleSelectRole("potential-vendor")}
+                className="text-left bg-secondary rounded-2xl p-8 border-2 border-transparent hover:border-primary hover:shadow-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary group"
+              >
+                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <Truck className="w-7 h-7 text-primary group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
+                  I want to sell food
+                </h3>
+                <p className="text-foreground/70 leading-relaxed mb-5">
+                  You grow, make, or import food, and you want us to carry your products and deliver them to restaurants across California.
+                </p>
+                <span className="inline-flex items-center gap-2 text-primary" style={{ fontWeight: 600 }}>
+                  Continue as a vendor
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </button>
+            </motion.div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center text-foreground/60 mt-8 max-w-2xl mx-auto"
-          >
-            Neither one fits? Give us a call at{" "}
-            <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
-              (626) 465-7855
-            </a>{" "}
-            and we'll point you in the right direction.
-          </motion.p>
-        </div>
-      </section>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-center text-foreground/60 mt-8 max-w-2xl mx-auto"
+            >
+              Neither one fits? Give us a call at{" "}
+              <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
+                (626) 465-7855
+              </a>{" "}
+              and we'll point you in the right direction.
+            </motion.p>
+          </div>
+        </section>
+      )}
 
       {/* Form Section */}
+      {hasSelectedRole && (
       <section className="py-16 bg-secondary">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <button
+            type="button"
+            onClick={() => setHasSelectedRole(false)}
+            className="inline-flex items-center gap-2 text-foreground/70 hover:text-primary mb-6 transition-colors"
+            style={{ fontWeight: 500 }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to selection
+          </button>
           <motion.div
             initial="initial"
             animate="animate"
@@ -529,6 +560,7 @@ export default function PartnerApplication() {
           </motion.div>
         </div>
       </section>
+      )}
     </div>
   );
 }

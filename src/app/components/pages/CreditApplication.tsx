@@ -83,7 +83,7 @@ export default function CreditApplication() {
       <section className="relative h-[40vh] min-h-[280px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1746494557939-2d305c1c834a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxyZXN0YXVyYW50JTIwa2l0Y2hlbiUyMGNoZWYlMjBjb29raW5nfGVufDF8fHx8MTc3NjA1OTMwOHww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="/images/application-hero.webp"
             alt="Restaurant kitchen"
             className="w-full h-full object-cover"
           />

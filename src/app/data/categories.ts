@@ -14,8 +14,7 @@ export const categories: Category[] = [
     tagline: "Fresh produce, delivered daily",
     description:
       "Farm-fresh vegetables, fruits, and specialty Asian produce sourced from trusted growers and delivered on a consistent schedule.",
-    image:
-      "https://images.unsplash.com/photo-1598357850706-0188bc0372b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/cat-fruits-vegetables.webp",
     items: [
       "Specialty Asian Vegetables",
       "Fresh Fruits",
@@ -31,8 +30,7 @@ export const categories: Category[] = [
     tagline: "Premium proteins for every menu",
     description:
       "USDA-certified meats and a deep selection of fresh and frozen seafood, cut and packaged for commercial kitchens.",
-    image:
-      "https://images.unsplash.com/photo-1594394490830-4cf54dd62910?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxyZXN0YXVyYW50JTIwa2l0Y2hlbiUyMGNoZWYlMjBjb29raW5nfGVufDF8fHx8MTc3NjA1OTMwOHww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/cat-meat-seafood.webp",
     items: [
       "Poultry (Fresh/Frozen)",
       "Beef",
@@ -51,8 +49,7 @@ export const categories: Category[] = [
     tagline: "Pantry staples & specialty ingredients",
     description:
       "Everything your line needs day in and day out — from bulk rice and oils to authentic Asian sauces and seasonings.",
-    image:
-      "https://images.unsplash.com/photo-1650012048722-c81295ccbe79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmcmVzaCUyMHByb2R1Y2UlMjB2ZWdldGFibGVzJTIwbWFya2V0JTIwd2hvbGVzYWxlfGVufDF8fHx8MTc3NjE0MjYxM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/cat-dry-grocery.webp",
     items: [
       "Starches & Oils",
       "Sauces",
@@ -68,8 +65,7 @@ export const categories: Category[] = [
     tagline: "Front-of-house & packaging supplies",
     description:
       "Keep service moving with reliable stock of to-go containers, utensils, paper goods, and cleaning essentials.",
-    image:
-      "https://images.unsplash.com/photo-1733809708507-e9f9c2b7bc53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080",
+    image: "/images/cat-disposables.webp",
     items: [
       "Food Containers",
       "Cups & Lids",
@@ -83,8 +79,7 @@ export const categories: Category[] = [
     tagline: "From water to boba, fully stocked",
     description:
       "A full beverage program for restaurants and boba shops — bottled water, sodas, syrups, boba powders and add-ons, and specialty drinks.",
-    image:
-      "https://images.unsplash.com/photo-1544145945-f90425340c7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+    image: "/images/cat-beverages.webp",
     items: [
       "Water",
       "Soft Drink (Glass/Canned/Syrup)",

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
 
@@ -7,13 +8,14 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-                <span className="text-primary font-bold text-xl">L&C</span>
-              </div>
-              <span className="text-xl" style={{ fontWeight: 600 }}>
-                L&C Food
-              </span>
+            <div className="inline-flex items-center justify-center mb-6 rounded-2xl bg-white px-4 py-3">
+              <Image
+                src="/images/lnc-logo.png"
+                alt="L&C Food"
+                width={367}
+                height={315}
+                className="h-14 w-auto"
+              />
             </div>
             <p className="text-white/80 leading-relaxed">
               Your trusted Asian food distribution partner. More than just supply – Global Foods, Local Solutions.

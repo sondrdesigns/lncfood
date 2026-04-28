@@ -70,7 +70,7 @@ export default function AboutUs() {
       <section className="relative h-[60vh] min-h-[400px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1752010284872-76526682bfee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="/images/about-hero.webp"
             alt="Warehouse with fresh produce"
             className="w-full h-full object-cover"
           />
@@ -128,7 +128,7 @@ export default function AboutUs() {
             <motion.div variants={fadeInUp} className="relative">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden">
                 <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1681514583222-0579e6835666?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmb29kJTIwZGlzdHJpYnV0aW9uJTIwd2FyZWhvdXNlJTIwbG9naXN0aWNzfGVufDF8fHx8MTc3NjE0MjYxNHww&ixlib=rb-4.1.0&q=80&w=1080"
+                  src="/images/about-story-section.webp"
                   alt="Distribution truck"
                   className="w-full h-full object-cover"
                 />
