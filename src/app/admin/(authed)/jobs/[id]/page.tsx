@@ -14,10 +14,27 @@ import {
 export const dynamic = "force-dynamic";
 
 type Params = { id: string };
+type Search = { created?: string };
 
-export default async function EditJobPage({ params }: { params: Params }) {
+export default async function EditJobPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams?: Search;
+}) {
   const job = await prisma.job.findUnique({ where: { id: params.id } });
   if (!job) notFound();
+
+  const justCreated = searchParams?.created === "1";
+  const initialSuccess = justCreated
+    ? {
+        title: "Job posting created",
+        detail: job.published
+          ? `Live now at /careers/${job.slug}.`
+          : "Saved as a draft. Toggle Published to make it visible on /careers.",
+      }
+    : undefined;
 
   const update = updateJobAction.bind(null, job.id);
   const archive = archiveJobAction.bind(null, job.id);
@@ -87,6 +104,8 @@ export default async function EditJobPage({ params }: { params: Params }) {
           }}
           action={update}
           submitLabel="Save changes"
+          publicSlug={job.slug}
+          initialSuccess={initialSuccess}
         />
       </div>
     </div>

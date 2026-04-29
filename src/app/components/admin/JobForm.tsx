@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 import type { FormState } from "@/lib/actions/jobs";
 import type { JobType } from "@/lib/validators/job";
 
@@ -28,26 +30,82 @@ export function JobForm({
   defaults,
   action,
   submitLabel,
+  publicSlug,
+  initialSuccess,
 }: {
   defaults?: JobFormValues;
   action: (prev: FormState | undefined, fd: FormData) => Promise<FormState>;
   submitLabel: string;
+  publicSlug?: string;
+  initialSuccess?: { title: string; detail?: string };
 }) {
   const [state, dispatch] = useFormState(action, initialState);
+  const [showInitial, setShowInitial] = useState(!!initialSuccess);
+  const bannerRef = useRef<HTMLDivElement | null>(null);
   const errs = state?.fieldErrors ?? {};
+
+  useEffect(() => {
+    if (state?.saved) {
+      setShowInitial(false);
+      bannerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (state?.error) {
+      bannerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [state?.saved, state?.error]);
+
+  const successTitle = state?.saved
+    ? "Changes saved"
+    : showInitial
+      ? initialSuccess!.title
+      : null;
+  const publishedAfterSave = state?.saved ? !!state.published : !!defaults?.published;
+  const successDetail = state?.saved
+    ? publishedAfterSave
+      ? "Your edits are live on /careers."
+      : "This posting is still a draft (Published is off)."
+    : showInitial
+      ? initialSuccess!.detail
+      : undefined;
+  const showLiveLink = !!successTitle && !!publicSlug && publishedAfterSave;
 
   return (
     <form action={dispatch} className="space-y-6">
-      {state?.error && (
-        <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
-          {state.error}
-        </div>
-      )}
-      {state?.saved && (
-        <div className="text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-3">
-          Changes saved.
-        </div>
-      )}
+      <div ref={bannerRef}>
+        {state?.error && (
+          <div className="text-sm text-red-700 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+            {state.error}
+          </div>
+        )}
+        {successTitle && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3.5"
+          >
+            <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-green-800" style={{ fontWeight: 600 }}>
+                {successTitle}
+              </p>
+              {successDetail && (
+                <p className="text-xs text-green-700/90 mt-0.5">{successDetail}</p>
+              )}
+            </div>
+            {showLiveLink && (
+              <a
+                href={`/careers/${publicSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-green-800 hover:text-green-900 underline-offset-2 hover:underline flex-shrink-0"
+                style={{ fontWeight: 600 }}
+              >
+                View live posting
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        )}
+      </div>
 
       <Field label="Title" name="title" error={errs.title}>
         <input

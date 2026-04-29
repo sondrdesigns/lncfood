@@ -11,6 +11,7 @@ export type FormState = {
   error?: string;
   fieldErrors?: Record<string, string>;
   saved?: boolean;
+  published?: boolean;
 };
 
 async function requireAdmin() {
@@ -79,7 +80,7 @@ export async function createJobAction(
   });
 
   revalidateAll(slug);
-  redirect(`/admin/jobs/${job.id}`);
+  redirect(`/admin/jobs/${job.id}?created=1`);
 }
 
 export async function updateJobAction(
@@ -110,7 +111,7 @@ export async function updateJobAction(
   });
 
   revalidateAll(current.slug);
-  return { saved: true };
+  return { saved: true, published: parsed.data.published };
 }
 
 export async function archiveJobAction(id: string) {
