@@ -10,6 +10,7 @@
     "test": "node --test tests/routes.test.mjs",
     "test:full": "pnpm build && pnpm test",
     "generate:images": "tsx scripts/generate-images.ts",
+    "regenerate:warehouse": "tsx scripts/regenerate-warehouse-images.ts",
     "postinstall": "prisma generate",
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:deploy": "dotenv -e .env.local -- prisma migrate deploy",

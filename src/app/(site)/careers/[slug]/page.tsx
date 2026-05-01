@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Briefcase, Clock, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { JsonLd } from "@/lib/seo/JsonLdScript";
+import { jobPostingLd } from "@/lib/seo/jsonld";
 
 export const revalidate = 60;
 
@@ -32,6 +34,7 @@ export default async function JobDetailPage({ params }: { params: Params }) {
 
   return (
     <div className="pt-20">
+      <JsonLd data={jobPostingLd(job)} />
       <section className="bg-primary text-white pt-16 pb-20">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <Link

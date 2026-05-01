@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Globe, Heart, TrendingUp, Scale, Handshake, Users as UsersIcon } from "lucide-react";
+import { Globe, Heart, TrendingUp, Scale, Handshake, Users as UsersIcon, Store, Package, Layers } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { branches } from "@/app/data/locations";
 
@@ -53,13 +53,25 @@ export default function AboutUs() {
     }
   ];
 
-  const customers = [
-    { name: "Royal India", logo: "RI" },
-    { name: "Sansei Seafood", logo: "SS" },
-    { name: "Yoshinova", logo: "YN" },
-    { name: "AFC Sushi", logo: "AFC" },
-    { name: "Golden Dragon", logo: "GD" },
-    { name: "Tokyo Express", logo: "TE" },
+  const franchiseSolutions = [
+    {
+      icon: Store,
+      title: "Franchise-Ready Distribution",
+      description:
+        "We work with franchise operators across California to deliver consistent quality and reliable service to every location, so the guest experience stays the same in every market.",
+    },
+    {
+      icon: Package,
+      title: "Custom Item Procurement",
+      description:
+        "Need a specialty ingredient or a recipe-specific SKU? We source custom items to spec — letting you serve a signature menu without sourcing it yourself.",
+    },
+    {
+      icon: Layers,
+      title: "A Streamlined Product Line",
+      description:
+        "We consolidate your sourcing under one trusted partner, simplifying ordering, reducing vendor sprawl, and keeping your line tight and predictable.",
+    },
   ];
 
   const locations = branches;
@@ -191,7 +203,7 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Our Customers */}
+      {/* Built for Franchise Operators */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
@@ -202,10 +214,10 @@ export default function AboutUs() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl text-foreground mb-4" style={{ fontWeight: 700 }}>
-              Our Customers
+              Built for Franchise Operators
             </h2>
-            <p className="text-lg text-foreground/70">
-              Trusted by leading restaurants across California
+            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+              Custom procurement and consistent supply, scaled to every location.
             </p>
           </motion.div>
 
@@ -214,21 +226,20 @@ export default function AboutUs() {
             whileInView="animate"
             viewport={{ once: true, margin: "-100px" }}
             variants={stagger}
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {customers.map((customer, index) => (
+            {franchiseSolutions.map((item) => (
               <motion.div
-                key={customer.name}
+                key={item.title}
                 variants={fadeInUp}
-                whileHover={{ scale: 1.05 }}
-                className="aspect-square bg-secondary rounded-2xl flex items-center justify-center p-6 hover:shadow-lg transition-all duration-300"
+                whileHover={{ y: -8 }}
+                className="bg-secondary rounded-2xl p-8 transition-all duration-300 hover:shadow-xl"
               >
-                <div className="text-center">
-                  <div className="text-3xl text-primary mb-2" style={{ fontWeight: 700 }}>
-                    {customer.logo}
-                  </div>
-                  <div className="text-sm text-foreground/60">{customer.name}</div>
+                <div className="w-16 h-16 rounded-xl bg-accent flex items-center justify-center mb-6">
+                  <item.icon className="w-8 h-8 text-primary" />
                 </div>
+                <h3 className="text-xl mb-3" style={{ fontWeight: 600 }}>{item.title}</h3>
+                <p className="text-foreground/60 leading-relaxed">{item.description}</p>
               </motion.div>
             ))}
           </motion.div>

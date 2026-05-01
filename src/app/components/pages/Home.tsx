@@ -5,8 +5,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { CountUp } from "../motion/CountUp";
-import { usePrefersReducedMotion } from "@/app/hooks/usePrefersReducedMotion";
-
 const MotionLink = motion.create(Link);
 
 export default function Home() {
@@ -23,8 +21,6 @@ export default function Home() {
       }
     }
   };
-
-  const prefersReducedMotion = usePrefersReducedMotion();
 
   return (
     <div className="pt-20">
@@ -203,15 +199,6 @@ export default function Home() {
 
       {/* Stats Section */}
       <section className="relative w-full py-24 md:py-28 bg-primary text-white overflow-hidden">
-        {!prefersReducedMotion && (
-          <motion.div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.14),transparent_60%)]"
-            animate={{ x: [0, 60, -20, 0], y: [0, -30, 20, 0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          />
-        )}
-
         <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div
             initial="initial"
@@ -224,7 +211,7 @@ export default function Home() {
               { to: 29, suffix: "", label: "Years of Excellence" },
               { to: 500, suffix: "+", label: "Restaurant Partners" },
               { to: 4, suffix: "", label: "California Distribution Centers + National Network" },
-              { to: 10, suffix: "+", label: "Year Average Customer Tenure" }
+              { to: 10, suffix: "+", label: "Year Average Partner Tenure" }
             ].map((stat) => (
               <motion.div
                 key={stat.label}

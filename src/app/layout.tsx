@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "@/styles/index.css";
+import { JsonLd } from "@/lib/seo/JsonLdScript";
+import { organizationLd, SITE_URL } from "@/lib/seo/jsonld";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -16,6 +18,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "L&C Food Distribution",
     template: "%s | L&C Food Distribution",
@@ -49,7 +52,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
-      <body>{children}</body>
+      <body>
+        <JsonLd data={organizationLd()} />
+        {children}
+      </body>
     </html>
   );
 }
