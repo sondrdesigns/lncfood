@@ -3,6 +3,7 @@ import { DM_Sans, Playfair_Display } from "next/font/google";
 import "@/styles/index.css";
 import { JsonLd } from "@/lib/seo/JsonLdScript";
 import { organizationLd, SITE_URL } from "@/lib/seo/jsonld";
+import { Analytics } from "@vercel/analytics/next"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -55,6 +56,7 @@ export default function RootLayout({
       <body>
         <JsonLd data={organizationLd()} />
         {children}
+        <Analytics />
       </body>
     </html>
   );

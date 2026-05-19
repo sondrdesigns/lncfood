@@ -33,10 +33,11 @@ function parseJobForm(fd: FormData) {
     schedule: fd.get("schedule") ?? "",
     description: fd.get("description") ?? "",
     requirements,
-    applyUrl: fd.get("applyUrl") ?? "",
     published: fd.get("published") === "on",
   });
 }
+
+const applyPathFor = (slug: string) => `/careers/${slug}/apply`;
 
 function collectFieldErrors(parsed: ReturnType<typeof parseJobForm>): Record<string, string> {
   if (parsed.success) return {};
@@ -74,6 +75,7 @@ export async function createJobAction(
     data: {
       ...parsed.data,
       slug,
+      applyUrl: applyPathFor(slug),
       publishedAt: parsed.data.published ? new Date() : null,
       updatedById: user.id,
     },
@@ -104,6 +106,7 @@ export async function updateJobAction(
     where: { id },
     data: {
       ...parsed.data,
+      applyUrl: applyPathFor(current.slug),
       publishedAt:
         parsed.data.published && !current.published ? new Date() : current.publishedAt,
       updatedById: user.id,

@@ -44,3 +44,77 @@ enum JobType {
   SALES
   ADMIN
 }
+
+model Application {
+  id             String    @id @default(cuid())
+  jobId          String?
+  jobSlug        String?
+  jobTitle       String?
+  firstName      String
+  lastName       String
+  email          String
+  phone          String
+  experience     String    @db.Text
+  resumeUrl      String?
+  resumeFilename String?
+  resumeSize     Int?
+  resumeMimeType String?
+  status         AppStatus @default(NEW)
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([jobId])
+  @@index([status])
+}
+
+enum AppStatus {
+  NEW
+  REVIEWED
+  CONTACTED
+  ARCHIVED
+}
+
+model PartnerApplication {
+  id            String              @id @default(cuid())
+  interestType  PartnerInterestType
+  firstName     String
+  lastName      String
+  businessName  String
+  cellPhone     String
+  businessPhone String?
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  howDidYouFind String
+  status        AppStatus           @default(NEW)
+  notes         String?             @db.Text
+  createdAt     DateTime            @default(now())
+
+  // Optional credit-application fields (set when the applicant opts to also
+  // request net 30 credit terms on the same submission).
+  businessLegalName          String?
+  dba                        String?
+  ein                        String?
+  yearsInBusiness            Int?
+  businessType               String?
+  estimatedMonthlyPurchases  String?
+  bankName                   String?
+  bankAccountLast4           String?
+  tradeReference1Name        String?
+  tradeReference1Phone       String?
+  tradeReference2Name        String?
+  tradeReference2Phone       String?
+  signerName                 String?
+  signerTitle                String?
+  creditAgreedAt             DateTime?
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+enum PartnerInterestType {
+  BUYER
+  VENDOR
+}

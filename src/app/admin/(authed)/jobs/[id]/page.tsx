@@ -99,7 +99,6 @@ export default async function EditJobPage({
             schedule: job.schedule,
             description: job.description,
             requirements: job.requirements,
-            applyUrl: job.applyUrl,
             published: job.published,
           }}
           action={update}

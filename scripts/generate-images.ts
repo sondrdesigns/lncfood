@@ -16,7 +16,7 @@ const JOBS: Job[] = [
   {
     file: "home-hero",
     aspectRatio: "16:9",
-    prompt: "Wide interior of a modern food distribution warehouse, tall steel racking stacked with neatly palletized cardboard boxes, polished concrete floor, a single forklift in soft focus mid-frame, tall glass loading-bay doors letting in golden afternoon light. Asian-American specialty distributor aesthetic, well-organized, prosperous.",
+    prompt: "Wide interior of a modern food distribution warehouse, completely open at the far end with no doors or entrance gates — the building is fully open to the outside world, framing a bright daylight view of the loading yard beyond. Tall steel racking stacked with neatly palletized cardboard boxes lines both sides, polished concrete floor, a single forklift in soft focus mid-frame. Golden afternoon light streams in unobstructed from the open end. Asian-American specialty distributor aesthetic, well-organized, prosperous. Do not depict roll-up doors, glass loading-bay doors, dock-leveler doors, or any entrance door whatsoever — the warehouse interior simply opens onto daylight.",
   },
   {
     file: "about-hero",
@@ -66,12 +66,25 @@ const JOBS: Job[] = [
   {
     file: "cat-dry-grocery",
     aspectRatio: "3:2",
-    prompt: "Shelf-style arrangement of pantry staples: a large rice bag, bottles of soy sauce and sesame oil, jars of chili crisp, dried noodles in clear packaging, canned bamboo shoots. Warm, organized, premium.",
+    // TODO: replace with client-specified product lineup once they share the
+    // actual SKU list. For now, packaging is intentionally generic and
+    // unbranded to avoid implying any specific brand affiliation.
+    prompt: "Realistic warehouse aisle shelf-perspective of Asian dry goods with completely UNBRANDED, generic packaging — no readable text, no logos, no brand marks, no specific brand colors. Large neutral kraft-paper and plain canvas bags of rice stacked low (the bags show only abstract crease and weave texture, no label artwork). Tall amber and clear glass bottles with simple paper labels that are intentionally blurred / illegible. Plain off-white cylindrical jars and shrink-wrapped plastic bricks of dried noodles with blank wrappers. Stacked tin cans with monochrome unlabeled wrappers. Natural in-aisle warehouse lighting from overhead, slight shelf depth, real material textures. Wholesale distributor inventory feel, not studio styled. Absolutely no readable brand names, slogans, or recognizable logo shapes anywhere in frame.",
   },
   {
     file: "cat-disposables",
     aspectRatio: "3:2",
-    prompt: "Stack of clean kraft and white to-go food containers, takeout boxes, paper cups with lids, wooden chopsticks and paper napkins, arranged neatly on a light surface. Modern packaging, sustainable feel.",
+    prompt: "Photorealistic food-service distributor warehouse shelf photo of bulk restaurant disposables in their real case-pack context: stacks of sealed cardboard cartons, open cartons showing kraft takeout boxes, wrapped white soup cups and lids, bundled paper napkins, sleeve-packed chopsticks, clear deli lids, black sushi trays, and brown paper bags on industrial metal shelving. Show real packaging repetition, corrugated box edges, plastic wrap, scuffed shelf surfaces, barcode-label-like details without readable brand text, and natural warehouse overhead lighting. Composition should feel like an actual wholesale inventory aisle, not a styled tabletop still life. Avoid ceramic bowls, houseplant decor, sunlit home-kitchen windows, perfect studio props, floating objects, styrofoam, and CGI-looking packaging.",
+  },
+  {
+    file: "about-built-for-scale",
+    aspectRatio: "4:3",
+    prompt: "Wide warehouse-floor perspective looking down a long aisle of tall blue pallet racking stacked four levels high with palletized cardboard cases — rice sacks on the lower shelves, sauce cases mid-level, beverage cases up top. An orange Toyota-style forklift with a stacked load is visible mid-aisle in soft focus. Polished concrete floor catching overhead light, exposed wood-beam ceiling with fluorescent strip lights. Sense of inventory depth, operational capacity, and quiet competence. Editorial commercial photography, not stocky.",
+  },
+  {
+    file: "products-cant-find-bg",
+    aspectRatio: "16:9",
+    prompt: "Moody, low-contrast warehouse-aisle photo with plenty of negative space and intentional shadow on the upper half so a dark green gradient overlay can sit on top with readable white text. A chef or sourcing manager in soft three-quarter focus stands mid-aisle inspecting a specialty Asian ingredient — a dried shiitake mushroom or a glass jar of fermented bean paste — held up to a shaft of light from a tall warehouse window. Surrounding shelves of cardboard cases recede into shadowy depth. Cinematic, atmospheric, premium.",
   },
   {
     file: "cat-beverages",
@@ -81,7 +94,28 @@ const JOBS: Job[] = [
 ];
 
 const OUT_DIR = join(process.cwd(), "public", "images");
-const MODEL = "gemini-3-pro-image-preview";
+const MODEL = process.env.IMAGE_MODEL ?? "gemini-2.5-flash-image";
+
+const MAX_ATTEMPTS = 5;
+
+async function generateWithRetry(
+  ai: GoogleGenAI,
+  params: Parameters<GoogleGenAI["models"]["generateContent"]>[0],
+) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const transient = /\b(503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand)\b/i.test(msg);
+      if (!transient || attempt === MAX_ATTEMPTS) throw err;
+      const delayMs = Math.min(60_000, 2_000 * 2 ** (attempt - 1));
+      process.stdout.write(`(transient ${attempt}/${MAX_ATTEMPTS}, retrying in ${delayMs / 1000}s) `);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+  throw new Error("unreachable");
+}
 
 async function main() {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -106,7 +140,7 @@ async function main() {
     const t0 = Date.now();
     process.stdout.write(`[${job.file}] (${job.aspectRatio}) generating... `);
 
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry(ai, {
       model: MODEL,
       contents: [{ role: "user", parts: [{ text: fullPrompt }] }],
       config: {

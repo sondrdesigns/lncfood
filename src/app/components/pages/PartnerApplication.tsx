@@ -1,17 +1,57 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { CheckCircle2, Phone, MapPin, UtensilsCrossed, Truck, FileText, ArrowRight, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Phone, MapPin, UtensilsCrossed, Truck, ArrowRight, ArrowLeft } from "lucide-react";
 import { getBranchByZip } from "@/app/lib/territory";
 import type { Branch } from "@/app/data/locations";
+import { submitPartnerApplicationAction } from "@/lib/actions/partner-applications";
+import { useLocale } from "@/app/components/LocaleProvider";
+
+type CreditFormState = {
+  businessLegalName: string;
+  dba: string;
+  ein: string;
+  yearsInBusiness: string;
+  businessType: string;
+  estimatedMonthlyPurchases: string;
+  bankName: string;
+  bankAccountLast4: string;
+  tradeReference1Name: string;
+  tradeReference1Phone: string;
+  tradeReference2Name: string;
+  tradeReference2Phone: string;
+  signerName: string;
+  signerTitle: string;
+};
+
+const initialCreditState: CreditFormState = {
+  businessLegalName: "",
+  dba: "",
+  ein: "",
+  yearsInBusiness: "",
+  businessType: "llc",
+  estimatedMonthlyPurchases: "",
+  bankName: "",
+  bankAccountLast4: "",
+  tradeReference1Name: "",
+  tradeReference1Phone: "",
+  tradeReference2Name: "",
+  tradeReference2Phone: "",
+  signerName: "",
+  signerTitle: "",
+};
 
 export default function PartnerApplication() {
+  const { t } = useLocale();
   const [submitted, setSubmitted] = useState(false);
   const [hasSelectedRole, setHasSelectedRole] = useState(false);
   const [assignedBranch, setAssignedBranch] = useState<Branch | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,6 +65,20 @@ export default function PartnerApplication() {
     zipCode: "",
     howDidYouFind: ""
   });
+  const [wantsCredit, setWantsCredit] = useState<boolean>(false);
+  const [creditData, setCreditData] = useState<CreditFormState>(initialCreditState);
+
+  // Buyers default-expand the credit section once they've chosen "buyer";
+  // vendors stay collapsed.
+  useEffect(() => {
+    if (!hasSelectedRole) return;
+    if (formData.interestType === "potential-customer") {
+      setWantsCredit(true);
+    } else {
+      setWantsCredit(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSelectedRole, formData.interestType]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
@@ -32,12 +86,32 @@ export default function PartnerApplication() {
     transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const isBuyer = formData.interestType === "potential-customer";
-    const branch = isBuyer && formData.state === "CA" ? getBranchByZip(formData.zipCode) : null;
-    setAssignedBranch(branch);
-    setSubmitted(true);
+    if (submitting) return;
+    setSubmitting(true);
+    setFormError(null);
+    setFieldErrors({});
+
+    const fd = new FormData(e.currentTarget);
+    fd.set("interestType", formData.interestType);
+    fd.set("credit_optIn", wantsCredit ? "1" : "0");
+
+    const result = await submitPartnerApplicationAction(undefined, fd);
+
+    if (result.ok) {
+      const isBuyer = formData.interestType === "potential-customer";
+      const branch =
+        isBuyer && formData.state === "CA" ? getBranchByZip(formData.zipCode) : null;
+      setAssignedBranch(branch);
+      setSubmitted(true);
+      setSubmitting(false);
+      return;
+    }
+
+    setFormError(result.error ?? t.partner.form.genericError);
+    setFieldErrors(result.fieldErrors ?? {});
+    setSubmitting(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -45,6 +119,12 @@ export default function PartnerApplication() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleCreditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
+    setCreditData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSelectRole = (interestType: string) => {
@@ -74,10 +154,10 @@ export default function PartnerApplication() {
           </motion.div>
 
           <h1 className="text-4xl md:text-5xl mb-4" style={{ fontWeight: 700 }}>
-            Thank You!
+            {t.partner.success.title}
           </h1>
           <p className="text-xl text-foreground/70 mb-8 leading-relaxed">
-            We've received your application and will review it shortly. Our team will reach out to you via email with your login information and next steps.
+            {t.partner.success.body}
           </p>
 
           {formData.interestType === "potential-customer" && (
@@ -89,13 +169,13 @@ export default function PartnerApplication() {
                 className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
               >
                 <p className="text-sm uppercase tracking-wider text-primary mb-2" style={{ fontWeight: 600 }}>
-                  Your assigned branch
+                  {t.partner.success.branchLabel}
                 </p>
                 <h2 className="text-2xl md:text-3xl mb-4" style={{ fontWeight: 700 }}>
                   L&amp;C {assignedBranch.city}
                 </h2>
                 <p className="text-foreground/70 mb-4">
-                  Need to reach us before you hear back? Contact your local branch directly.
+                  {t.partner.success.branchHint}
                 </p>
                 <div className="space-y-3">
                   <a
@@ -120,49 +200,18 @@ export default function PartnerApplication() {
                 className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 text-left"
               >
                 <p className="text-foreground/70">
-                  Your location is outside our current service territory. Our team will follow up directly to discuss how we can support you — in the meantime you can reach our main line at{" "}
+                  {t.partner.success.outsideTerritoryPrefix}{" "}
                   <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
                     (626) 465-7855
                   </a>
-                  .
+                  {t.partner.success.outsideTerritorySuffix}
                 </p>
               </motion.div>
             )
           )}
 
-          {formData.interestType === "potential-customer" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="bg-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 mb-8 text-left"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl mb-2" style={{ fontWeight: 700 }}>
-                    Need a credit application?
-                  </h3>
-                  <p className="text-foreground/70 mb-5 leading-relaxed">
-                    Want to set up a credit account so you can order on terms instead of paying up front? Fill out our credit application and we'll review it with your partner application.
-                  </p>
-                  <Link
-                    href="/credit-application"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
-                    style={{ fontWeight: 600 }}
-                  >
-                    Start credit application
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           <p className="text-lg text-foreground/60">
-            Expected response time: 1-2 business days
+            {t.partner.success.responseTime}
           </p>
         </motion.div>
       </div>
@@ -174,10 +223,13 @@ export default function PartnerApplication() {
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[300px] flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <ImageWithFallback
+          <Image
             src="/images/application-hero.webp"
             alt="Chef preparing food"
-            className="w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70" />
         </div>
@@ -187,18 +239,18 @@ export default function PartnerApplication() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl md:text-6xl text-white mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl text-white mb-6"
             style={{ fontWeight: 700 }}
           >
-            Let's Partner Up
+            {t.partner.hero.title}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed"
+            className="text-lg sm:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed"
           >
-            Want to buy food from us, or sell food to us? Fill out this form and we'll get back to you in 1-2 business days.
+            {t.partner.hero.subtitle}
           </motion.p>
         </div>
       </section>
@@ -213,11 +265,11 @@ export default function PartnerApplication() {
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl md:text-4xl mb-4" style={{ fontWeight: 700 }}>
-                Which one are you?
+              <h2 className="text-2xl sm:text-3xl md:text-4xl mb-4" style={{ fontWeight: 700 }}>
+                {t.partner.selection.title}
               </h2>
               <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-                Pick the option that sounds like you and we&rsquo;ll take you to the right form.
+                {t.partner.selection.subtitle}
               </p>
             </motion.div>
 
@@ -236,13 +288,13 @@ export default function PartnerApplication() {
                   <UtensilsCrossed className="w-7 h-7 text-primary group-hover:text-white transition-colors" />
                 </div>
                 <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
-                  I want to buy food
+                  {t.partner.selection.buyerCard.title}
                 </h3>
                 <p className="text-foreground/70 leading-relaxed mb-5">
-                  You run a restaurant, market, or food business, and you need someone to deliver fresh ingredients and Asian food products to your kitchen.
+                  {t.partner.selection.buyerCard.description}
                 </p>
                 <span className="inline-flex items-center gap-2 text-primary" style={{ fontWeight: 600 }}>
-                  Continue as a buyer
+                  {t.partner.selection.buyerCard.cta}
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </button>
@@ -256,13 +308,13 @@ export default function PartnerApplication() {
                   <Truck className="w-7 h-7 text-primary group-hover:text-white transition-colors" />
                 </div>
                 <h3 className="text-2xl mb-3" style={{ fontWeight: 700 }}>
-                  I want to sell food
+                  {t.partner.selection.vendorCard.title}
                 </h3>
                 <p className="text-foreground/70 leading-relaxed mb-5">
-                  You grow, make, or import food, and you want us to carry your products and deliver them to restaurants across California.
+                  {t.partner.selection.vendorCard.description}
                 </p>
                 <span className="inline-flex items-center gap-2 text-primary" style={{ fontWeight: 600 }}>
-                  Continue as a vendor
+                  {t.partner.selection.vendorCard.cta}
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </span>
               </button>
@@ -274,11 +326,11 @@ export default function PartnerApplication() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-center text-foreground/60 mt-8 max-w-2xl mx-auto"
             >
-              Neither one fits? Give us a call at{" "}
+              {t.partner.selection.fallback}{" "}
               <a href="tel:6264657855" className="text-primary hover:underline" style={{ fontWeight: 600 }}>
-                (626) 465-7855
-              </a>{" "}
-              and we'll point you in the right direction.
+                {t.partner.selection.fallbackPhone}
+              </a>
+              .
             </motion.p>
           </div>
         </section>
@@ -295,7 +347,7 @@ export default function PartnerApplication() {
             style={{ fontWeight: 500 }}
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to selection
+            {t.partner.backToSelection}
           </button>
           <motion.div
             initial="initial"
@@ -303,12 +355,32 @@ export default function PartnerApplication() {
             variants={fadeInUp}
             className="bg-white rounded-3xl shadow-xl p-8 md:p-12"
           >
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+              {/* Honeypot — bots fill this; real users don't see it. */}
+              <div aria-hidden="true" className="hidden" tabIndex={-1}>
+                <label htmlFor="website">Website</label>
+                <input
+                  type="text"
+                  id="website"
+                  name="website"
+                  autoComplete="off"
+                  tabIndex={-1}
+                />
+              </div>
+
+              {formError && (
+                <div
+                  role="alert"
+                  className="rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3"
+                >
+                  {formError}
+                </div>
+              )}
               {/* Name Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="firstName" className="block mb-2 text-foreground">
-                    First Name <span className="text-red-500">*</span>
+                    {t.partner.form.firstName} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <input
                     type="text"
@@ -322,7 +394,7 @@ export default function PartnerApplication() {
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block mb-2 text-foreground">
-                    Last Name <span className="text-red-500">*</span>
+                    {t.partner.form.lastName} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <input
                     type="text"
@@ -339,20 +411,20 @@ export default function PartnerApplication() {
               {/* Interest Type */}
               <div>
                 <span className="block mb-3 text-foreground">
-                  I am a... <span className="text-red-500">*</span>
+                  {t.partner.form.iAmA} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" role="radiogroup" aria-label="Interest type">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" role="radiogroup" aria-label={t.partner.form.iAmA}>
                   {[
                     {
                       value: "potential-customer",
-                      title: "Potential Customer",
-                      subtitle: "I want to buy food from L&C",
+                      title: t.partner.form.buyer.title,
+                      subtitle: t.partner.form.buyer.subtitle,
                       Icon: UtensilsCrossed,
                     },
                     {
                       value: "potential-vendor",
-                      title: "Potential Vendor",
-                      subtitle: "I want to sell my food to L&C",
+                      title: t.partner.form.vendor.title,
+                      subtitle: t.partner.form.vendor.subtitle,
                       Icon: Truck,
                     },
                   ].map(({ value, title, subtitle, Icon }) => {
@@ -398,7 +470,7 @@ export default function PartnerApplication() {
               {/* Business Name */}
               <div>
                 <label htmlFor="businessName" className="block mb-2 text-foreground">
-                  Business Name <span className="text-red-500">*</span>
+                  {t.partner.form.businessName} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                 </label>
                 <input
                   type="text"
@@ -415,7 +487,7 @@ export default function PartnerApplication() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="cellPhone" className="block mb-2 text-foreground">
-                    Cell Phone Number <span className="text-red-500">*</span>
+                    {t.partner.form.cellPhone} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <input
                     type="tel"
@@ -430,7 +502,7 @@ export default function PartnerApplication() {
                 </div>
                 <div>
                   <label htmlFor="businessPhone" className="block mb-2 text-foreground">
-                    Business Phone Number
+                    {t.partner.form.businessPhone}
                   </label>
                   <input
                     type="tel"
@@ -447,7 +519,7 @@ export default function PartnerApplication() {
               {/* Business Address */}
               <div>
                 <label htmlFor="address" className="block mb-2 text-foreground">
-                  Business Address <span className="text-red-500">*</span>
+                  {t.partner.form.address} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                 </label>
                 <input
                   type="text"
@@ -456,7 +528,7 @@ export default function PartnerApplication() {
                   required
                   value={formData.address}
                   onChange={handleChange}
-                  placeholder="Street Address"
+                  placeholder={t.partner.form.addressPlaceholder}
                   className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
                 />
               </div>
@@ -465,7 +537,7 @@ export default function PartnerApplication() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label htmlFor="city" className="block mb-2 text-foreground">
-                    City <span className="text-red-500">*</span>
+                    {t.partner.form.city} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <input
                     type="text"
@@ -479,7 +551,7 @@ export default function PartnerApplication() {
                 </div>
                 <div>
                   <label htmlFor="state" className="block mb-2 text-foreground">
-                    State <span className="text-red-500">*</span>
+                    {t.partner.form.state} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <select
                     id="state"
@@ -498,7 +570,7 @@ export default function PartnerApplication() {
                 </div>
                 <div>
                   <label htmlFor="zipCode" className="block mb-2 text-foreground">
-                    Zip Code <span className="text-red-500">*</span>
+                    {t.partner.form.zipCode} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                   </label>
                   <input
                     type="text"
@@ -516,7 +588,7 @@ export default function PartnerApplication() {
               {/* How Did You Find Us */}
               <div>
                 <label htmlFor="howDidYouFind" className="block mb-2 text-foreground">
-                  How Did You Find Us? <span className="text-red-500">*</span>
+                  {t.partner.form.howDidYouFind} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
                 </label>
                 <select
                   id="howDidYouFind"
@@ -526,35 +598,339 @@ export default function PartnerApplication() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
                 >
-                  <option value="">Select an option</option>
-                  <option value="google">Google Search</option>
-                  <option value="referral">Referral from Another Restaurant</option>
-                  <option value="social-media">Social Media</option>
-                  <option value="sales-rep">Sales Representative</option>
-                  <option value="trade-show">Trade Show / Event</option>
-                  <option value="other">Other</option>
+                  <option value="">{t.partner.form.howOptions.select}</option>
+                  <option value="google">{t.partner.form.howOptions.google}</option>
+                  <option value="referral">{t.partner.form.howOptions.referral}</option>
+                  <option value="social-media">{t.partner.form.howOptions.social}</option>
+                  <option value="sales-rep">{t.partner.form.howOptions.salesRep}</option>
+                  <option value="trade-show">{t.partner.form.howOptions.tradeShow}</option>
+                  <option value="other">{t.partner.form.howOptions.other}</option>
                 </select>
               </div>
+
+              {/* Credit Application (optional, buyers only) */}
+              {formData.interestType === "potential-customer" && (
+              <div className="pt-4 border-t border-border">
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={wantsCredit}
+                    onChange={(e) => setWantsCredit(e.target.checked)}
+                    className="mt-1 h-5 w-5 rounded border-foreground/30 text-primary focus:ring-primary"
+                  />
+                  <span>
+                    <span className="block text-foreground" style={{ fontWeight: 600 }}>
+                      {t.credit.hero.title}
+                    </span>
+                    <span className="block text-sm text-foreground/60 mt-1">
+                      {t.credit.hero.subtitle}
+                    </span>
+                  </span>
+                </label>
+
+                {wantsCredit && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-6 space-y-8">
+                      {/* Business Info */}
+                      <div>
+                        <h3 className="text-lg sm:text-xl mb-5" style={{ fontWeight: 700 }}>
+                          {t.credit.sections.businessInfo}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="md:col-span-2">
+                            <label htmlFor="credit_businessLegalName" className="block mb-2 text-foreground">
+                              {t.credit.labels.businessLegalName} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_businessLegalName"
+                              name="credit_businessLegalName"
+                              required={wantsCredit}
+                              value={creditData.businessLegalName}
+                              onChange={handleCreditChange}
+                              aria-invalid={Boolean(fieldErrors.credit_businessLegalName)}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                            {fieldErrors.credit_businessLegalName && (
+                              <p className="mt-1 text-sm text-red-600">{fieldErrors.credit_businessLegalName}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="credit_dba" className="block mb-2 text-foreground">
+                              {t.credit.labels.dba}
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_dba"
+                              name="credit_dba"
+                              value={creditData.dba}
+                              onChange={handleCreditChange}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="credit_ein" className="block mb-2 text-foreground">
+                              {t.credit.labels.ein} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_ein"
+                              name="credit_ein"
+                              required={wantsCredit}
+                              value={creditData.ein}
+                              onChange={handleCreditChange}
+                              placeholder={t.credit.placeholders.einExample}
+                              aria-invalid={Boolean(fieldErrors.credit_ein)}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                            {fieldErrors.credit_ein && (
+                              <p className="mt-1 text-sm text-red-600">{fieldErrors.credit_ein}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="credit_yearsInBusiness" className="block mb-2 text-foreground">
+                              {t.credit.labels.yearsInBusiness} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              id="credit_yearsInBusiness"
+                              name="credit_yearsInBusiness"
+                              required={wantsCredit}
+                              min={0}
+                              value={creditData.yearsInBusiness}
+                              onChange={handleCreditChange}
+                              aria-invalid={Boolean(fieldErrors.credit_yearsInBusiness)}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                            {fieldErrors.credit_yearsInBusiness && (
+                              <p className="mt-1 text-sm text-red-600">{fieldErrors.credit_yearsInBusiness}</p>
+                            )}
+                          </div>
+                          <div>
+                            <label htmlFor="credit_businessType" className="block mb-2 text-foreground">
+                              {t.credit.labels.businessType} <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                              id="credit_businessType"
+                              name="credit_businessType"
+                              required={wantsCredit}
+                              value={creditData.businessType}
+                              onChange={handleCreditChange}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            >
+                              <option value="llc">{t.credit.businessTypes.llc}</option>
+                              <option value="corporation">{t.credit.businessTypes.corporation}</option>
+                              <option value="s-corp">{t.credit.businessTypes.sCorp}</option>
+                              <option value="partnership">{t.credit.businessTypes.partnership}</option>
+                              <option value="sole-prop">{t.credit.businessTypes.soleProp}</option>
+                            </select>
+                          </div>
+                          <div className="md:col-span-2">
+                            <label htmlFor="credit_estimatedMonthlyPurchases" className="block mb-2 text-foreground">
+                              {t.credit.labels.monthlyPurchases} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_estimatedMonthlyPurchases"
+                              name="credit_estimatedMonthlyPurchases"
+                              required={wantsCredit}
+                              value={creditData.estimatedMonthlyPurchases}
+                              onChange={handleCreditChange}
+                              placeholder={t.credit.placeholders.monthlyExample}
+                              aria-invalid={Boolean(fieldErrors.credit_estimatedMonthlyPurchases)}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bank Reference */}
+                      <div className="pt-4 border-t border-border">
+                        <h3 className="text-xl mb-5" style={{ fontWeight: 700 }}>
+                          {t.credit.sections.bankReference}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="credit_bankName" className="block mb-2 text-foreground">
+                              {t.credit.labels.bankName} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_bankName"
+                              name="credit_bankName"
+                              required={wantsCredit}
+                              value={creditData.bankName}
+                              onChange={handleCreditChange}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="credit_bankAccountLast4" className="block mb-2 text-foreground">
+                              {t.credit.labels.accountLast4} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_bankAccountLast4"
+                              name="credit_bankAccountLast4"
+                              required={wantsCredit}
+                              inputMode="numeric"
+                              pattern="[0-9]{4}"
+                              maxLength={4}
+                              value={creditData.bankAccountLast4}
+                              onChange={handleCreditChange}
+                              placeholder={t.credit.placeholders.accountExample}
+                              aria-invalid={Boolean(fieldErrors.credit_bankAccountLast4)}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                            {fieldErrors.credit_bankAccountLast4 && (
+                              <p className="mt-1 text-sm text-red-600">{fieldErrors.credit_bankAccountLast4}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Trade References */}
+                      <div className="pt-4 border-t border-border">
+                        <h3 className="text-xl mb-2" style={{ fontWeight: 700 }}>
+                          {t.credit.sections.tradeReferences}
+                        </h3>
+                        <p className="text-foreground/60 mb-5">
+                          {t.credit.sections.tradeReferencesSubtitle}
+                        </p>
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label htmlFor="credit_tradeReference1Name" className="block mb-2 text-foreground">
+                                {t.credit.labels.ref1Company} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="credit_tradeReference1Name"
+                                name="credit_tradeReference1Name"
+                                required={wantsCredit}
+                                value={creditData.tradeReference1Name}
+                                onChange={handleCreditChange}
+                                className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="credit_tradeReference1Phone" className="block mb-2 text-foreground">
+                                {t.credit.labels.ref1Phone} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="tel"
+                                id="credit_tradeReference1Phone"
+                                name="credit_tradeReference1Phone"
+                                required={wantsCredit}
+                                value={creditData.tradeReference1Phone}
+                                onChange={handleCreditChange}
+                                placeholder={t.credit.placeholders.phoneExample}
+                                className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                              <label htmlFor="credit_tradeReference2Name" className="block mb-2 text-foreground">
+                                {t.credit.labels.ref2Company} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="credit_tradeReference2Name"
+                                name="credit_tradeReference2Name"
+                                required={wantsCredit}
+                                value={creditData.tradeReference2Name}
+                                onChange={handleCreditChange}
+                                className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="credit_tradeReference2Phone" className="block mb-2 text-foreground">
+                                {t.credit.labels.ref2Phone} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="tel"
+                                id="credit_tradeReference2Phone"
+                                name="credit_tradeReference2Phone"
+                                required={wantsCredit}
+                                value={creditData.tradeReference2Phone}
+                                onChange={handleCreditChange}
+                                placeholder={t.credit.placeholders.phoneExample}
+                                className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Authorized Signer */}
+                      <div className="pt-4 border-t border-border">
+                        <h3 className="text-xl mb-5" style={{ fontWeight: 700 }}>
+                          {t.credit.sections.authorizedSigner}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label htmlFor="credit_signerName" className="block mb-2 text-foreground">
+                              {t.credit.labels.signerName} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_signerName"
+                              name="credit_signerName"
+                              required={wantsCredit}
+                              value={creditData.signerName}
+                              onChange={handleCreditChange}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="credit_signerTitle" className="block mb-2 text-foreground">
+                              {t.credit.labels.signerTitle} <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="credit_signerTitle"
+                              name="credit_signerTitle"
+                              required={wantsCredit}
+                              value={creditData.signerTitle}
+                              onChange={handleCreditChange}
+                              placeholder={t.credit.placeholders.signerTitleExample}
+                              className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+              )}
 
               {/* Submit Button */}
               <div className="pt-4">
                 <motion.button
                   type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
+                  disabled={submitting}
+                  whileHover={submitting ? undefined : { scale: 1.02 }}
+                  whileTap={submitting ? undefined : { scale: 0.98 }}
+                  className="w-full px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
                   style={{ fontWeight: 600 }}
                 >
-                  Submit Application
+                  {submitting ? t.partner.form.submitting : t.partner.form.submit}
                 </motion.button>
               </div>
 
               <p className="text-sm text-foreground/60 text-center">
-                By submitting this form, you agree to our{" "}
-                <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>{" "}
-                and acknowledge our{" "}
-                <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
-                We&rsquo;ll contact you within 1&ndash;2 business days.
+                {t.partner.form.terms.prefix}{" "}
+                <Link href="/terms" className="text-primary hover:underline">{t.partner.form.terms.tos}</Link>{" "}
+                {t.partner.form.terms.middle}{" "}
+                <Link href="/privacy" className="text-primary hover:underline">{t.partner.form.terms.privacy}</Link>
+                {t.partner.form.terms.suffix}
               </p>
             </form>
           </motion.div>

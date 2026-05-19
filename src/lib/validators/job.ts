@@ -4,8 +4,6 @@ export const jobTypeEnum = z.enum(["WAREHOUSE", "DELIVERY", "SALES", "ADMIN"]);
 
 export type JobType = z.infer<typeof jobTypeEnum>;
 
-const applyUrlPattern = /^(https?:\/\/|mailto:|tel:|\/)/i;
-
 export const jobInputSchema = z.object({
   title: z.string().trim().min(2, "Title must be at least 2 characters").max(120),
   type: jobTypeEnum,
@@ -16,14 +14,6 @@ export const jobInputSchema = z.object({
     .array(z.string().trim().min(1))
     .min(1, "Add at least one requirement")
     .max(20, "Keep requirements under 20 items"),
-  applyUrl: z
-    .string()
-    .trim()
-    .min(1, "Apply URL is required")
-    .refine(
-      (v) => applyUrlPattern.test(v),
-      "Must be a URL (http/https), mailto:, tel:, or internal path (starting with /)"
-    ),
   published: z.boolean(),
 });
 

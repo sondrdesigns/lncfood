@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, LayoutDashboard, Briefcase } from "lucide-react";
+import { LogOut, LayoutDashboard, Inbox, Handshake } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export const metadata = {
   title: "Admin — L&C Food Distribution",
@@ -11,6 +12,11 @@ export const metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
+
+  const [newJobApplications, newPartnerApplications] = await Promise.all([
+    prisma.application.count({ where: { status: "NEW" } }),
+    prisma.partnerApplication.count({ where: { status: "NEW" } }),
+  ]);
 
   return (
     <div className="min-h-screen bg-secondary">
@@ -31,12 +37,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Dashboard
           </Link>
           <Link
-            href="/admin/jobs/new"
+            href="/admin/applications"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-foreground/80 hover:bg-accent hover:text-primary transition-colors"
             style={{ fontWeight: 500 }}
           >
-            <Briefcase className="w-4 h-4" />
-            New Job
+            <Inbox className="w-4 h-4" />
+            <span className="flex-1">Applications</span>
+            <NotificationBadge count={newJobApplications} label="new job applications" />
+          </Link>
+          <Link
+            href="/admin/partner-applications"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-foreground/80 hover:bg-accent hover:text-primary transition-colors"
+            style={{ fontWeight: 500 }}
+          >
+            <Handshake className="w-4 h-4" />
+            <span className="flex-1">Partner Applications</span>
+            <NotificationBadge count={newPartnerApplications} label="new partner applications" />
           </Link>
         </nav>
         <form
@@ -60,5 +76,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="max-w-5xl mx-auto px-8 py-10">{children}</div>
       </main>
     </div>
+  );
+}
+
+function NotificationBadge({ count, label }: { count: number; label: string }) {
+  if (count <= 0) return null;
+
+  return (
+    <span
+      className="min-w-5 h-5 px-1.5 rounded-full bg-red-600 text-white text-[11px] leading-5 text-center"
+      style={{ fontWeight: 700 }}
+      aria-label={`${count} ${label}`}
+      title={`${count} ${label}`}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
   );
 }

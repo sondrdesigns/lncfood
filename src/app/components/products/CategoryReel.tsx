@@ -1,6 +1,6 @@
 "use client";
 
-import { MotionValue, motion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, MotionValue, useScroll, useSpring, useTransform } from "motion/react";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
@@ -9,27 +9,36 @@ import { categories, type Category } from "@/app/data/categories";
 
 const PANELS = categories.length;
 
+function panelStop(index: number, total: number) {
+  return total <= 1 ? 0 : index / (total - 1);
+}
+
 export function CategoryReel() {
   const prm = usePrefersReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const m = window.matchMedia("(max-width: 768px)");
-    const update = () => setIsMobile(m.matches);
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const update = () => setIsMobile(mediaQuery.matches);
     update();
-    m.addEventListener("change", update);
-    return () => m.removeEventListener("change", update);
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
   }, []);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  const smoothed = useSpring(scrollYProgress, {
-    stiffness: 90,
-    damping: 28,
-    mass: 0.4,
+  // Snap raw scroll progress to the nearest discrete panel stop, then ease via spring.
+  // Each ~one-panel chunk of vertical scroll triggers a single decisive horizontal swipe.
+  const snapped = useTransform(scrollYProgress, (v) =>
+    Math.round(v * (PANELS - 1)) / (PANELS - 1),
+  );
+  const smoothed = useSpring(snapped, {
+    stiffness: 220,
+    damping: 30,
+    mass: 0.6,
   });
   const xPct = useTransform(smoothed, [0, 1], ["0%", `-${(PANELS - 1) * (100 / PANELS)}%`]);
 
@@ -76,12 +85,16 @@ function ReelPanel({
   total: number;
   progress: MotionValue<number>;
 }) {
-  const start = index / total;
-  const end = (index + 1) / total;
-  const local = useTransform(progress, [start, end], [0, 1]);
+  const stop = panelStop(index, total);
+  const halfStep = total <= 1 ? 0.5 : 0.5 / (total - 1);
+  const enter = Math.max(0, stop - halfStep);
+  const leave = Math.min(1, stop + halfStep);
+  const isLast = index === total - 1;
+  const local = useTransform(progress, [enter, leave], [0, 1]);
   const imgX = useTransform(local, [0, 1], ["-8%", "8%"]);
-  const txtY = useTransform(local, [0, 0.5, 1], ["40px", "0px", "-40px"]);
-  const txtOpacity = useTransform(local, [0, 0.15, 0.85, 1], [0, 1, 1, 0]);
+  const textProgress = isLast ? [enter, stop] : [enter, stop, leave];
+  const txtY = useTransform(progress, textProgress, isLast ? ["40px", "0px"] : ["40px", "0px", "-40px"]);
+  const txtOpacity = useTransform(progress, textProgress, isLast ? [0, 1] : [0, 1, 0]);
 
   return (
     <div className="relative w-screen h-full flex flex-col lg:flex-row shrink-0">
@@ -156,9 +169,10 @@ function ProgressDot({
   total: number;
   progress: MotionValue<number>;
 }) {
-  const start = index / total;
-  const mid = (index + 0.5) / total;
-  const end = (index + 1) / total;
+  const mid = panelStop(index, total);
+  const halfStep = total <= 1 ? 0.5 : 0.5 / (total - 1);
+  const start = Math.max(0, mid - halfStep);
+  const end = Math.min(1, mid + halfStep);
   const width = useTransform(progress, [start, mid, end], [8, 32, 8]);
   const opacity = useTransform(progress, [start, mid, end], [0.4, 1, 0.4]);
   return <motion.div style={{ width, opacity }} className="h-1 rounded-full bg-white" />;

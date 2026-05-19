@@ -1,4 +1,4 @@
-export type UseCaseIcon = "CupSoda" | "Soup" | "ChefHat" | "Fish";
+export type UseCaseIcon = "BobaCup" | "PhoBowl" | "Wok" | "SushiFish";
 
 export type UseCase = {
   slug: string;
@@ -13,7 +13,7 @@ export const useCases: UseCase[] = [
   {
     slug: "boba-shop",
     name: "Boba Shop",
-    icon: "CupSoda",
+    icon: "BobaCup",
     tagline: "Drinks, toppings, packaging — every shift covered.",
     items: [
       "Boba & tapioca pearls",
@@ -27,7 +27,7 @@ export const useCases: UseCase[] = [
   {
     slug: "pho-restaurant",
     name: "Pho Restaurant",
-    icon: "Soup",
+    icon: "PhoBowl",
     tagline: "Stock the broth, the bowl, and everything between.",
     items: [
       "Beef bones & cuts",
@@ -41,7 +41,7 @@ export const useCases: UseCase[] = [
   {
     slug: "chinese-kitchen",
     name: "Chinese Kitchen",
-    icon: "ChefHat",
+    icon: "Wok",
     tagline: "Bulk staples and authentic ingredients on schedule.",
     items: [
       "Bulk rice & noodles",
@@ -55,7 +55,7 @@ export const useCases: UseCase[] = [
   {
     slug: "sushi-bar",
     name: "Sushi Bar",
-    icon: "Fish",
+    icon: "SushiFish",
     tagline: "Sashimi-grade seafood and the rest of the line.",
     items: [
       "Sushi-grade fish",

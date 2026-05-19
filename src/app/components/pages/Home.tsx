@@ -1,13 +1,35 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Award, Users, Warehouse, Handshake, type LucideIcon } from "lucide-react";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { CountUp } from "../motion/CountUp";
+import { usePrefersReducedMotion } from "@/app/hooks/usePrefersReducedMotion";
+import { useLocale } from "@/app/components/LocaleProvider";
 const MotionLink = motion.create(Link);
 
+type Stat = { icon: LucideIcon; to: number; suffix: string; label: string };
+
 export default function Home() {
+  const prm = usePrefersReducedMotion();
+  const { t } = useLocale();
+
+  const services = [
+    { image: "/images/cat-fruits-vegetables.webp", ...t.home.services.veggies },
+    { image: "/images/cat-meat-seafood.webp", ...t.home.services.meat },
+    { image: "/images/cat-dry-grocery.webp", ...t.home.services.dryGoods },
+    { image: "/images/cat-disposables.webp", ...t.home.services.disposables },
+  ];
+
+  const homeStats: Stat[] = [
+    { icon: Award, to: 29, suffix: "", label: t.home.stats.yearsLabel },
+    { icon: Users, to: 500, suffix: "+", label: t.home.stats.partnersLabel },
+    { icon: Warehouse, to: 4, suffix: "", label: t.home.stats.branchesLabel },
+    { icon: Handshake, to: 10, suffix: "+", label: t.home.stats.tenureLabel },
+  ];
+
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
     animate: { opacity: 1, y: 0 },
@@ -27,10 +49,13 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-screen min-h-[600px] w-full flex items-center overflow-hidden">
         <div className="absolute inset-0">
-          <ImageWithFallback
+          <Image
             src="/images/home-hero.webp"
             alt="Modern warehouse facility"
-            className="w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
         </div>
@@ -48,14 +73,14 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="inline-block mb-6 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
             >
-              <span className="text-white/90 text-sm" style={{ fontWeight: 500 }}>Trusted Since 1995</span>
+              <span className="text-white/90 text-sm" style={{ fontWeight: 500 }}>{t.home.hero.badge}</span>
             </motion.div>
 
-            <h1 className="text-5xl md:text-7xl text-white mb-6 leading-tight" style={{ fontWeight: 700 }}>
-              Your Trusted Asian Food Distribution Partner
+            <h1 className="text-4xl sm:text-5xl md:text-7xl text-white mb-6 leading-tight" style={{ fontWeight: 700 }}>
+              {t.home.hero.title}
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed" style={{ fontWeight: 400 }}>
-              More than just supply – Global Foods, Local Solutions
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 leading-relaxed" style={{ fontWeight: 400 }}>
+              {t.home.hero.subtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -66,7 +91,7 @@ export default function Home() {
                 className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl inline-flex items-center gap-2 transition-colors"
                 style={{ fontWeight: 600 }}
               >
-                Partner With Us
+                {t.cta.partnerWithUs}
                 <ArrowRight className="w-5 h-5" />
               </MotionLink>
               <MotionLink
@@ -76,7 +101,7 @@ export default function Home() {
                 className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white rounded-xl inline-flex items-center transition-colors"
                 style={{ fontWeight: 600 }}
               >
-                Browse Catalog
+                {t.cta.browseCatalog}
               </MotionLink>
             </div>
           </motion.div>
@@ -104,22 +129,23 @@ export default function Home() {
             </motion.div>
 
             <motion.div variants={fadeInUp}>
-              <h2 className="text-4xl md:text-5xl text-foreground mb-6" style={{ fontWeight: 700 }}>
-                About L&C Food Distribution
+              <h2 className="text-3xl sm:text-4xl md:text-5xl text-foreground mb-6" style={{ fontWeight: 700 }}>
+                {t.home.about.title}
               </h2>
               <p className="text-lg text-foreground/70 mb-6 leading-relaxed">
-                At L&C Food Distribution, we don't just deliver products – we deliver peace of mind. As a business partner, our mission is to make your sourcing solution simple, consistent, and cost-effective.
+                {t.home.about.body1}
               </p>
               <p className="text-lg text-foreground/70 mb-8 leading-relaxed">
-                Ready to experience the difference? Since 1995, we've been serving restaurants across California with unwavering commitment to quality and reliability.
+                {t.home.about.body2}
               </p>
               <MotionLink
                 href="/about"
-                whileHover={{ x: 5 }}
-                className="text-primary inline-flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl inline-flex items-center gap-2 transition-colors"
                 style={{ fontWeight: 600 }}
               >
-                Learn More About Us
+                {t.cta.learnMore}
                 <ArrowRight className="w-5 h-5" />
               </MotionLink>
             </motion.div>
@@ -137,11 +163,11 @@ export default function Home() {
             variants={fadeInUp}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl text-foreground mb-4" style={{ fontWeight: 700 }}>
-              Our Services
+            <h2 className="text-3xl sm:text-4xl md:text-5xl text-foreground mb-4" style={{ fontWeight: 700 }}>
+              {t.home.services.title}
             </h2>
             <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-              Comprehensive food distribution solutions tailored to your business needs
+              {t.home.services.subtitle}
             </p>
           </motion.div>
 
@@ -152,28 +178,7 @@ export default function Home() {
             variants={stagger}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {[
-              {
-                image: "/images/cat-fruits-vegetables.webp",
-                title: "Fresh Vegetables",
-                description: "Farm-fresh produce delivered daily to keep your menu vibrant and healthy."
-              },
-              {
-                image: "/images/cat-meat-seafood.webp",
-                title: "Meat Products",
-                description: "Premium quality meats sourced from trusted suppliers for your customers."
-              },
-              {
-                image: "/images/cat-dry-grocery.webp",
-                title: "Dry Groceries",
-                description: "Comprehensive selection of pantry staples and specialty Asian ingredients."
-              },
-              {
-                image: "/images/cat-disposables.webp",
-                title: "Disposables",
-                description: "Complete range of food service supplies and packaging solutions."
-              }
-            ].map((service, index) => (
+            {services.map((service) => (
               <motion.div
                 key={service.title}
                 variants={fadeInUp}
@@ -207,19 +212,34 @@ export default function Home() {
             variants={stagger}
             className="grid grid-cols-2 md:grid-cols-4 gap-8"
           >
-            {[
-              { to: 29, suffix: "", label: "Years of Excellence" },
-              { to: 500, suffix: "+", label: "Restaurant Partners" },
-              { to: 4, suffix: "", label: "California Distribution Centers + National Network" },
-              { to: 10, suffix: "+", label: "Year Average Partner Tenure" }
-            ].map((stat) => (
+            {homeStats.map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={fadeInUp}
+                whileHover={prm ? undefined : "hover"}
+                initial="rest"
+                animate="rest"
                 className="text-center"
               >
+                <motion.div
+                  variants={{
+                    rest: { scale: 1, rotate: 0 },
+                    hover: {
+                      scale: 1.15,
+                      rotate: [0, -8, 8, 0],
+                      transition: { type: "tween", duration: 0.5, ease: "easeInOut" },
+                    },
+                  }}
+                  initial={prm ? false : { scale: 0, rotate: -45 }}
+                  whileInView={prm ? undefined : { scale: 1, rotate: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ type: "spring", stiffness: 220, damping: 14 }}
+                  className="flex justify-center mb-4"
+                >
+                  <stat.icon className="w-12 h-12 md:w-14 md:h-14 text-white" strokeWidth={1.75} />
+                </motion.div>
                 <div
-                  className="mb-2 leading-none text-4xl md:text-5xl"
+                  className="mb-2 leading-none text-3xl md:text-4xl lg:text-5xl"
                   style={{ fontWeight: 700 }}
                 >
                   <CountUp to={stat.to} suffix={stat.suffix} />
@@ -251,11 +271,11 @@ export default function Home() {
             </div>
 
             <div className="relative z-10 px-12 py-20 md:py-28 text-center">
-              <h2 className="text-4xl md:text-5xl text-white mb-6" style={{ fontWeight: 700 }}>
-                Ready to Partner With Us?
+              <h2 className="text-3xl sm:text-4xl md:text-5xl text-white mb-6" style={{ fontWeight: 700 }}>
+                {t.home.finalCta.title}
               </h2>
               <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-                Join hundreds of successful restaurants across California who trust L&C Food Distribution for their supply needs.
+                {t.home.finalCta.body}
               </p>
               <MotionLink
                 href="/partner-application"
@@ -264,7 +284,7 @@ export default function Home() {
                 className="px-10 py-5 bg-white text-primary rounded-xl inline-flex items-center gap-2 mx-auto w-fit hover:bg-white/95 transition-colors"
                 style={{ fontWeight: 600 }}
               >
-                Get Started Today
+                {t.cta.getStarted}
                 <ArrowRight className="w-5 h-5" />
               </MotionLink>
             </div>

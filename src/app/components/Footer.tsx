@@ -1,8 +1,31 @@
+"use client";
+
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
+import { Mail, Phone, MapPin, Award, Users, Globe, Building2 } from "lucide-react";
+import { usePrefersReducedMotion } from "@/app/hooks/usePrefersReducedMotion";
+import { useLocale } from "@/app/components/LocaleProvider";
 
 export default function Footer() {
+  const prm = usePrefersReducedMotion();
+  const { t } = useLocale();
+
+  const iconHover = prm
+    ? undefined
+    : {
+        scale: 1.2,
+        y: [0, -2, 0],
+        transition: { type: "tween" as const, duration: 0.4, ease: "easeInOut" as const },
+      };
+
+  const credentials = [
+    { Icon: Award, label: t.footer.credentials.established },
+    { Icon: Building2, label: t.footer.credentials.branches },
+    { Icon: Users, label: t.footer.credentials.family },
+    { Icon: Globe, label: t.footer.credentials.specialists },
+  ];
+
   return (
     <footer className="bg-primary text-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
@@ -18,81 +41,71 @@ export default function Footer() {
               />
             </div>
             <p className="text-white/80 leading-relaxed">
-              Your trusted Asian food distribution partner. More than just supply – Global Foods, Local Solutions.
+              {t.footer.tagline}
             </p>
           </div>
 
           <div>
-            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Quick Links</h3>
+            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>{t.footer.quickLinks}</h3>
             <div className="space-y-2">
-              <Link href="/" className="block text-white/80 hover:text-white transition-colors">Home</Link>
-              <Link href="/about" className="block text-white/80 hover:text-white transition-colors">About Us</Link>
-              <Link href="/products" className="block text-white/80 hover:text-white transition-colors">Products</Link>
-              <Link href="/careers" className="block text-white/80 hover:text-white transition-colors">Careers</Link>
+              <Link href="/" className="block text-white/80 hover:text-white transition-colors">{t.nav.home}</Link>
+              <Link href="/about" className="block text-white/80 hover:text-white transition-colors">{t.nav.about}</Link>
+              <Link href="/products" className="block text-white/80 hover:text-white transition-colors">{t.nav.products}</Link>
+              <Link href="/careers" className="block text-white/80 hover:text-white transition-colors">{t.nav.careers}</Link>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Contact</h3>
+            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>{t.footer.contact}</h3>
             <div className="space-y-3">
-              <a href="tel:626-465-7855" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors">
-                <Phone className="w-4 h-4" />
+              <a href="tel:626-465-7855" className="group flex items-center gap-3 text-white/80 hover:text-white transition-colors">
+                <motion.span whileHover={iconHover} className="inline-flex">
+                  <Phone className="w-4 h-4" />
+                </motion.span>
                 <span>626-465-7855</span>
               </a>
-              <a href="mailto:info@lncfood.com" className="flex items-center gap-3 text-white/80 hover:text-white transition-colors">
-                <Mail className="w-4 h-4" />
+              <a href="mailto:info@lncfood.com" className="group flex items-center gap-3 text-white/80 hover:text-white transition-colors">
+                <motion.span whileHover={iconHover} className="inline-flex">
+                  <Mail className="w-4 h-4" />
+                </motion.span>
                 <span>info@lncfood.com</span>
               </a>
               <div className="flex items-start gap-3 text-white/80">
-                <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>Mon – Fri: 8:00 am – 5:00 pm</span>
+                <motion.span whileHover={iconHover} className="inline-flex mt-1 flex-shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </motion.span>
+                <span>{t.footer.hours}</span>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Legal</h3>
+            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>{t.footer.legal}</h3>
             <div className="space-y-2">
-              <Link href="/privacy" className="block text-white/80 hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="/terms" className="block text-white/80 hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="/accessibility" className="block text-white/80 hover:text-white transition-colors">Accessibility</Link>
+              <Link href="/privacy" className="block text-white/80 hover:text-white transition-colors">{t.footer.privacy}</Link>
+              <Link href="/terms" className="block text-white/80 hover:text-white transition-colors">{t.footer.terms}</Link>
+              <Link href="/accessibility" className="block text-white/80 hover:text-white transition-colors">{t.footer.accessibility}</Link>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>Follow Us</h3>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
-                aria-label="Facebook (coming soon)"
-                disabled
-              >
-                <Facebook className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
-                aria-label="Instagram (coming soon)"
-                disabled
-              >
-                <Instagram className="w-5 h-5" />
-              </button>
-              <button
-                type="button"
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors disabled:opacity-60"
-                aria-label="LinkedIn (coming soon)"
-                disabled
-              >
-                <Linkedin className="w-5 h-5" />
-              </button>
-            </div>
+            <h3 className="text-lg mb-4" style={{ fontWeight: 600 }}>{t.footer.why}</h3>
+            <ul className="space-y-3">
+              {credentials.map(({ Icon, label }) => (
+                <li key={label} className="flex items-start gap-3 text-white/80">
+                  <motion.span whileHover={iconHover} className="inline-flex mt-0.5 flex-shrink-0">
+                    <Icon className="w-4 h-4" />
+                  </motion.span>
+                  <span>{label}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/10">
-          <p className="text-center text-white/60 text-sm">
-            © {new Date().getFullYear()} L&C Food Distribution. All rights reserved.
+          <p className="text-center text-white/75 text-sm">
+            © {new Date().getFullYear()} L&C Food Distribution. {t.footer.rights}
           </p>
         </div>
       </div>

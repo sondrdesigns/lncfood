@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Briefcase, Clock, MapPin } from "lucide-react";
@@ -9,11 +10,11 @@ export const revalidate = 60;
 
 type Params = { slug: string };
 
-async function getJob(slug: string) {
-  return prisma.job.findFirst({
+const getJob = cache(async (slug: string) =>
+  prisma.job.findFirst({
     where: { slug, published: true, archivedAt: null },
-  });
-}
+  }),
+);
 
 export async function generateMetadata({ params }: { params: Params }) {
   const job = await getJob(params.slug);
@@ -24,13 +25,9 @@ export async function generateMetadata({ params }: { params: Params }) {
   };
 }
 
-const isExternalUrl = (url: string) => /^(https?:|mailto:|tel:)/i.test(url);
-
 export default async function JobDetailPage({ params }: { params: Params }) {
   const job = await getJob(params.slug);
   if (!job) notFound();
-
-  const external = isExternalUrl(job.applyUrl);
 
   return (
     <div className="pt-20">
@@ -88,25 +85,13 @@ export default async function JobDetailPage({ params }: { params: Params }) {
             </ul>
 
             <div className="border-t border-border pt-8">
-              {external ? (
-                <a
-                  href={job.applyUrl}
-                  target={job.applyUrl.startsWith("http") ? "_blank" : undefined}
-                  rel={job.applyUrl.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="inline-flex px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  Apply for this role
-                </a>
-              ) : (
-                <Link
-                  href={job.applyUrl}
-                  className="inline-flex px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
-                  style={{ fontWeight: 600 }}
-                >
-                  Apply for this role
-                </Link>
-              )}
+              <Link
+                href={`/careers/${job.slug}/apply`}
+                className="inline-flex px-8 py-4 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
+                style={{ fontWeight: 600 }}
+              >
+                Apply for this role
+              </Link>
             </div>
           </div>
         </div>

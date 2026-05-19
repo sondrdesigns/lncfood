@@ -13,7 +13,6 @@ export type JobFormValues = {
   schedule?: string;
   description?: string;
   requirements?: string[];
-  applyUrl?: string;
   published?: boolean;
 };
 
@@ -173,20 +172,6 @@ export function JobForm({
           required
           rows={6}
           className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors resize-y font-mono text-sm"
-        />
-      </Field>
-
-      <Field
-        label="Apply URL"
-        name="applyUrl"
-        error={errs.applyUrl}
-        hint="A web URL (https://…), mailto:, tel:, or internal path (/partner-application)."
-      >
-        <input
-          name="applyUrl"
-          defaultValue={defaults?.applyUrl}
-          required
-          className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors"
         />
       </Field>
 

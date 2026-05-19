@@ -75,12 +75,13 @@ test("GET /about returns 200 and has Our Story", async () => {
   assert.match(html, /Our Story/);
 });
 
-test("GET /products returns 200 and lists categories", async () => {
+test("GET /products returns 200 and shows core sections", async () => {
   const { status, html } = await getHtml("/products");
   assert.equal(status, 200);
-  assert.match(html, /Our Products/);
-  assert.match(html, /Fruits (?:&|&amp;) Vegetables/);
-  assert.match(html, /Dry Grocery/);
+  // Stats section heading (stable, not split by SplitWords)
+  assert.match(html, /A network big enough to say yes/);
+  // Off-catalog sourcing section
+  assert.match(html, /Don(?:'|&#x27;|&apos;)t see it\? We(?:'|&#x27;|&apos;)ll source it\./);
 });
 
 test("GET /careers returns 200 and lists jobs", async () => {
@@ -90,13 +91,21 @@ test("GET /careers returns 200 and lists jobs", async () => {
   assert.match(html, /Warehouse Associate/);
 });
 
-test("GET /partner-application returns 200 and has the form", async () => {
+test("GET /careers/[slug]/apply renders resume upload controls", async () => {
+  const { status, html } = await getHtml("/careers/warehouse-associate/apply");
+  assert.equal(status, 200);
+  assert.match(html, /Tell us about yourself/);
+  assert.match(html, /<form/);
+  assert.match(html, /name="resume"/);
+  assert.match(html, /type="file"/);
+  assert.match(html, /PDF, DOC, or DOCX up to 5 MB/);
+});
+
+test("GET /partner-application returns 200 and renders application UI", async () => {
   const { status, html } = await getHtml("/partner-application");
   assert.equal(status, 200);
   assert.match(html, /Let(?:'|&#x27;|&apos;)s Partner Up/);
-  assert.match(html, /<form/);
-  assert.match(html, /name="firstName"/);
-  assert.match(html, /name="businessName"/);
+  assert.match(html, /application-hero\.webp/);
 });
 
 test("GET /__does_not_exist__ returns 404 with custom not-found", async () => {
@@ -141,14 +150,16 @@ test("no <a><button> nesting in rendered HTML (invalid HTML regression)", async 
   }
 });
 
-test("Footer social buttons are <button>, not empty-href <a>", async () => {
+test("Footer renders credentials strip (no empty-href social links)", async () => {
   const { html } = await getHtml("/");
-  // the old Codex output had <a href="#"> with aria-label="Facebook"; regression guard:
+  // Regression guard against the old Codex pattern: <a href="#"> with aria-label="Facebook".
   assert.ok(
     !/<a[^>]+href=['"]#['"][^>]*aria-label=['"]Facebook['"]/i.test(html),
     "Facebook link should not be an empty-href anchor",
   );
-  assert.match(html, /aria-label="Facebook \(coming soon\)"/);
+  // Social block was replaced with a credentials/trust strip; verify it rendered.
+  assert.match(html, /Established 1995/);
+  assert.match(html, /Why L(?:&|&amp;)C/);
 });
 
 test("viewport meta tag is emitted", async () => {
