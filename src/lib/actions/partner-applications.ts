@@ -8,7 +8,23 @@ import {
   partnerApplicationInputSchema,
 } from "@/lib/validators/partner-application";
 import { applyApplicationRateLimit } from "@/lib/rate-limit";
-import { sendPartnerApplicationNotificationEmail } from "@/lib/email";
+import {
+  sendPartnerApplicationNotificationEmail,
+  sendPartnerApplicantConfirmationEmail,
+} from "@/lib/email";
+import { uploadBlob } from "@/lib/actions/_upload";
+
+const CATALOG_MAX_BYTES = 10 * 1024 * 1024;
+const CATALOG_ALLOWED_MIME = new Set([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const CATALOG_ALLOWED_EXT = /\.(pdf|xlsx|xls|csv|docx)$/i;
+const CATALOG_MIME_ERROR =
+  "Catalog must be a PDF, XLSX, XLS, CSV, or DOCX file.";
 
 export type PartnerApplicationFormState = {
   ok?: boolean;
@@ -52,6 +68,7 @@ export async function submitPartnerApplicationAction(
     interestType,
     firstName: str(fd.get("firstName")),
     lastName: str(fd.get("lastName")),
+    email: str(fd.get("email")),
     businessName: str(fd.get("businessName")),
     cellPhone: str(fd.get("cellPhone")),
     businessPhone: businessPhoneRaw === "" ? undefined : businessPhoneRaw,
@@ -125,47 +142,94 @@ export async function submitPartnerApplicationAction(
     };
   }
 
-  await prisma.partnerApplication.create({
+  // Product catalog upload — only for vendors; silently skip if interestType != VENDOR.
+  type CatalogUpload = { url: string; filename: string; size: number; mimeType: string } | null;
+  let catalog: CatalogUpload = null;
+  if (interestType === "VENDOR") {
+    const catalogRaw = fd.get("productCatalog");
+    if (catalogRaw instanceof File && catalogRaw.size > 0) {
+      const result = await uploadBlob(catalogRaw, "catalogs", {
+        maxBytes: CATALOG_MAX_BYTES,
+        allowedMime: CATALOG_ALLOWED_MIME,
+        allowedExt: CATALOG_ALLOWED_EXT,
+        mimeError: CATALOG_MIME_ERROR,
+        fallbackName: "catalog",
+      });
+      if ("error" in result) {
+        return {
+          error: "Please fix the errors below.",
+          fieldErrors: { productCatalog: result.error },
+        };
+      }
+      catalog = result.upload;
+    }
+  }
+
+  const row = await prisma.partnerApplication.create({
     data: {
       ...parsed.data,
       businessPhone: parsed.data.businessPhone ?? null,
       ...creditData,
+      productCatalogUrl: catalog?.url ?? null,
+      productCatalogFilename: catalog?.filename ?? null,
+      productCatalogSize: catalog?.size ?? null,
+      productCatalogMimeType: catalog?.mimeType ?? null,
     },
   });
 
   // Best-effort notification — log but don't block the response on email failure.
   try {
-    await sendPartnerApplicationNotificationEmail({
-      interestType: parsed.data.interestType,
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      businessName: parsed.data.businessName,
-      cellPhone: parsed.data.cellPhone,
-      businessPhone: parsed.data.businessPhone ?? null,
-      address: parsed.data.address,
-      city: parsed.data.city,
-      state: parsed.data.state,
-      zipCode: parsed.data.zipCode,
-      howDidYouFind: parsed.data.howDidYouFind,
-      credit: wantsCredit
-        ? {
-            businessLegalName: String(creditData.businessLegalName),
-            dba: creditData.dba ? String(creditData.dba) : null,
-            ein: String(creditData.ein),
-            yearsInBusiness: Number(creditData.yearsInBusiness),
-            businessType: String(creditData.businessType),
-            estimatedMonthlyPurchases: String(creditData.estimatedMonthlyPurchases),
-            bankName: String(creditData.bankName),
-            bankAccountLast4: String(creditData.bankAccountLast4),
-            tradeReference1Name: String(creditData.tradeReference1Name),
-            tradeReference1Phone: String(creditData.tradeReference1Phone),
-            tradeReference2Name: String(creditData.tradeReference2Name),
-            tradeReference2Phone: String(creditData.tradeReference2Phone),
-            signerName: String(creditData.signerName),
-            signerTitle: String(creditData.signerTitle),
-          }
-        : null,
-    });
+    const emailPromises: Promise<unknown>[] = [
+      sendPartnerApplicationNotificationEmail({
+        interestType: parsed.data.interestType,
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        email: parsed.data.email,
+        businessName: parsed.data.businessName,
+        cellPhone: parsed.data.cellPhone,
+        businessPhone: parsed.data.businessPhone ?? null,
+        address: parsed.data.address,
+        city: parsed.data.city,
+        state: parsed.data.state,
+        zipCode: parsed.data.zipCode,
+        howDidYouFind: parsed.data.howDidYouFind,
+        productCatalog: catalog
+          ? { filename: catalog.filename, adminId: row.id }
+          : null,
+        credit: wantsCredit
+          ? {
+              businessLegalName: String(creditData.businessLegalName),
+              dba: creditData.dba ? String(creditData.dba) : null,
+              ein: String(creditData.ein),
+              yearsInBusiness: Number(creditData.yearsInBusiness),
+              businessType: String(creditData.businessType),
+              estimatedMonthlyPurchases: String(creditData.estimatedMonthlyPurchases),
+              bankName: String(creditData.bankName),
+              bankAccountLast4: String(creditData.bankAccountLast4),
+              tradeReference1Name: String(creditData.tradeReference1Name),
+              tradeReference1Phone: String(creditData.tradeReference1Phone),
+              tradeReference2Name: String(creditData.tradeReference2Name),
+              tradeReference2Phone: String(creditData.tradeReference2Phone),
+              signerName: String(creditData.signerName),
+              signerTitle: String(creditData.signerTitle),
+            }
+          : null,
+      }),
+    ];
+
+    // Confirmation email to applicant (requires email field, which is now required).
+    emailPromises.push(
+      sendPartnerApplicantConfirmationEmail({
+        firstName: parsed.data.firstName,
+        email: parsed.data.email,
+        interestType: parsed.data.interestType,
+        businessName: parsed.data.businessName,
+        hasCredit: wantsCredit,
+        hasCatalog: !!catalog,
+      }),
+    );
+
+    await Promise.all(emailPromises);
   } catch (e) {
     console.error("[partner-applications] email send failed", e);
   }

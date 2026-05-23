@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { CheckCircle2, ExternalLink } from "lucide-react";
 import type { FormState } from "@/lib/actions/jobs";
-import type { JobType } from "@/lib/validators/job";
+import type { JobType, BranchSlugEnum } from "@/lib/validators/job";
+import { branches } from "@/app/data/locations";
 
 export type JobFormValues = {
   title?: string;
@@ -14,6 +15,7 @@ export type JobFormValues = {
   description?: string;
   requirements?: string[];
   published?: boolean;
+  branchSlug?: BranchSlugEnum;
 };
 
 const TYPE_OPTIONS: { value: JobType; label: string }[] = [
@@ -21,6 +23,14 @@ const TYPE_OPTIONS: { value: JobType; label: string }[] = [
   { value: "DELIVERY", label: "Delivery" },
   { value: "SALES", label: "Sales" },
   { value: "ADMIN", label: "Administrative" },
+];
+
+// Map Prisma enum values back to the branch data for label/city resolution.
+const BRANCH_OPTIONS: { value: BranchSlugEnum; label: string; city: string }[] = [
+  { value: "SAN_DIEGO", label: "San Diego", city: "San Diego" },
+  { value: "LOS_ANGELES", label: "Los Angeles (City of Industry)", city: "Los Angeles" },
+  { value: "FRESNO", label: "Fresno", city: "Fresno" },
+  { value: "SAN_JOSE", label: "San Jose", city: "San Jose" },
 ];
 
 const initialState: FormState = {};
@@ -42,6 +52,20 @@ export function JobForm({
   const [showInitial, setShowInitial] = useState(!!initialSuccess);
   const bannerRef = useRef<HTMLDivElement | null>(null);
   const errs = state?.fieldErrors ?? {};
+
+  // When the admin picks a branch, default the location text to the branch city.
+  const [locationOverride, setLocationOverride] = useState<string | undefined>(defaults?.location);
+
+  function handleBranchChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value as BranchSlugEnum | "";
+    if (!val) return;
+    const opt = BRANCH_OPTIONS.find((o) => o.value === val);
+    if (opt) {
+      // Default the location field to the branch city — admin can still override.
+      const branch = branches.find((b) => b.city === opt.city);
+      setLocationOverride(branch ? `${branch.city}, CA` : opt.city);
+    }
+  }
 
   useEffect(() => {
     if (state?.saved) {
@@ -131,6 +155,24 @@ export function JobForm({
           </select>
         </Field>
 
+        <Field label="Branch" name="branchSlug" error={errs.branchSlug} hint="Auto-fills Location when selected">
+          <select
+            name="branchSlug"
+            defaultValue={defaults?.branchSlug ?? ""}
+            onChange={handleBranchChange}
+            className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors"
+          >
+            <option value="">— No branch assigned —</option>
+            {BRANCH_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Field label="Schedule" name="schedule" error={errs.schedule} hint="e.g. Full-time, Part-time, Seasonal">
           <input
             name="schedule"
@@ -139,16 +181,17 @@ export function JobForm({
             className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors"
           />
         </Field>
-      </div>
 
-      <Field label="Location" name="location" error={errs.location} hint="e.g. Los Angeles, CA">
-        <input
-          name="location"
-          defaultValue={defaults?.location}
-          required
-          className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors"
-        />
-      </Field>
+        <Field label="Location" name="location" error={errs.location} hint="e.g. Los Angeles, CA — auto-filled by Branch">
+          <input
+            name="location"
+            value={locationOverride ?? ""}
+            onChange={(e) => setLocationOverride(e.target.value)}
+            required
+            className="w-full px-3 py-2.5 bg-secondary rounded-lg border border-transparent focus:border-primary focus:outline-none transition-colors"
+          />
+        </Field>
+      </div>
 
       <Field label="Description" name="description" error={errs.description}>
         <textarea

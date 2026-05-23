@@ -21,9 +21,9 @@ const JOBS: Job[] = [
   {
     file: "home-hero",
     aspectRatio: "16:9",
-    refs: ["interior-forklift.jpeg", "interior-aisle-wide.jpeg"],
+    refs: ["interior-aisle-wide.jpeg", "interior-forklift.jpeg"],
     prompt:
-      "Wide interior of the L&C food distribution warehouse: tall blue steel pallet racking stacked with neatly palletized cardboard cases, polished concrete floor, an orange Toyota forklift in soft focus mid-frame, exposed wood-beam ceiling with fluorescent strip lighting overhead. Composition should read as a confident hero image - tidy, well-stocked, and active without being chaotic. Keep the warehouse's signature wood ceiling and blue racking from the references.",
+      "Wide interior of the L&C food distribution warehouse: tall blue steel pallet racking stacked with neatly palletized cardboard cases lining both sides of the aisle, polished concrete floor, an orange Toyota forklift in soft focus mid-frame, exposed wood-beam ceiling with fluorescent strip lighting overhead. The far end of the aisle is fully and completely OPEN to the outside — the building simply ends and opens directly onto bright daylight and the loading yard beyond. There is NO door of any kind at the far end: do not depict a roll-up door, do not depict a glass loading-bay door, do not depict a dock-leveler door, do not depict an entrance door, do not depict a sliding door, do not depict any door frame or door hardware whatsoever. The opening is an unobstructed rectangular aperture flooded with warm golden daylight pouring straight into the warehouse. Composition should read as a confident hero image — tidy, well-stocked, and active without being chaotic. Keep the warehouse's signature wood-beam ceiling, blue racking, polished concrete, and overall L&C character from the references, but replace whatever is at the far end of the aisle with pure open daylight.",
   },
   {
     file: "about-hero",
@@ -52,6 +52,14 @@ const JOBS: Job[] = [
     refs: ["truck-at-dock.jpeg"],
     prompt:
       "Side profile of the white L&C refrigerated delivery box truck parked at the warehouse loading dock under a sunny California sky. The real green L&C / '陈氏食品公司' logo and (888) 988-8816 phone number on the truck side should be preserved accurately from the reference. Clean, professional commercial vehicle photography, slight three-quarter angle, gray warehouse facade behind.",
+  },
+  {
+    // TODO(client): Replace with the actual SKU lineup once the client re-confirms which dry-grocery products to feature. Until then, packaging must remain unbranded/unrecognizable.
+    file: "cat-dry-grocery",
+    aspectRatio: "3:2",
+    refs: ["interior-aisle-stocked.jpeg"],
+    prompt:
+      "Aisle shelf-perspective inside the L&C warehouse showing Asian dry goods on the actual blue pallet racking from the references, lit by the real overhead fluorescent strip lighting beneath the exposed wood-beam ceiling, polished concrete floor underfoot. Match the warehouse character of the reference photo exactly. The PRODUCTS themselves, however, must be completely UNBRANDED and unrecognizable — absolutely no readable text in any language, no logos, no brand marks, no slogans, no QR codes, no Asian-character typography (no Chinese, Japanese, Korean, Thai, or Vietnamese characters anywhere on packaging), no English brand names, no mascots, no seals, no flag motifs, no country-of-origin badges. Use generic burlap and natural-fiber rice sacks tied with plain twine on the lower shelves, large neutral kraft-paper bags with NO print at all, plain undyed canvas sacks, and a few items with torn-off / peeled-off label remnants so the packaging visibly has no identity. Tall amber and clear glass bottles with blank cream paper labels OR labels heavily out-of-focus and fully illegible. Plain off-white cylindrical jars with matte unprinted lids. Shrink-wrapped plastic bricks of dried noodles with completely blank wrappers. Stacked tin cans with monochrome paper wrappers in muted neutral tones, no graphics. Cardboard cases in plain unprinted corrugated brown with no stamps or stencils. Any face that would normally carry branding must be either blank, torn, blurred out of focus, or turned away from camera. Real wholesale distributor inventory feel — not studio styled. If any glyph or character would otherwise appear, render it as illegible smudges or omit it entirely. Zero recognizable brands, zero readable text, zero logo shapes anywhere in frame.",
   },
 ];
 

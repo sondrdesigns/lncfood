@@ -177,6 +177,7 @@ export type Messages = {
     form: {
       firstName: string;
       lastName: string;
+      email: string;
       iAmA: string;
       buyer: RoleOption;
       vendor: RoleOption;
@@ -198,6 +199,13 @@ export type Messages = {
         tradeShow: string;
         other: string;
       };
+      catalogLabel: string;
+      catalogOptional: string;
+      catalogHint: string;
+      catalogChooseFile: string;
+      catalogRemove: string;
+      catalogSizeError: string;
+      catalogTypeError: string;
       submit: string;
       submitting: string;
       requiredAsterisk: string;
@@ -465,6 +473,7 @@ export const messages: Record<Locale, Messages> = {
       form: {
         firstName: "First Name",
         lastName: "Last Name",
+        email: "Email Address",
         iAmA: "I am a...",
         buyer: { title: "Potential Customer", subtitle: "I want to buy food from L&C" },
         vendor: { title: "Potential Vendor", subtitle: "I want to sell my food to L&C" },
@@ -486,6 +495,13 @@ export const messages: Record<Locale, Messages> = {
           tradeShow: "Trade Show / Event",
           other: "Other",
         },
+        catalogLabel: "Product Catalog",
+        catalogOptional: "optional",
+        catalogHint: "PDF, XLSX, XLS, CSV, or DOCX up to 10 MB.",
+        catalogChooseFile: "Choose a file to upload",
+        catalogRemove: "Remove",
+        catalogSizeError: "Catalog must be 10 MB or smaller.",
+        catalogTypeError: "Catalog must be a PDF, XLSX, XLS, CSV, or DOCX file.",
         submit: "Submit Application",
         submitting: "Submitting...",
         requiredAsterisk: "*",
@@ -771,6 +787,7 @@ export const messages: Record<Locale, Messages> = {
       form: {
         firstName: "Nombre",
         lastName: "Apellido",
+        email: "Correo Electrónico",
         iAmA: "Soy un...",
         buyer: { title: "Cliente Potencial", subtitle: "Quiero comprar comida a L&C" },
         vendor: { title: "Proveedor Potencial", subtitle: "Quiero vender mi comida a L&C" },
@@ -792,6 +809,13 @@ export const messages: Record<Locale, Messages> = {
           tradeShow: "Feria comercial / Evento",
           other: "Otro",
         },
+        catalogLabel: "Catálogo de Productos",
+        catalogOptional: "opcional",
+        catalogHint: "PDF, XLSX, XLS, CSV o DOCX de hasta 10 MB.",
+        catalogChooseFile: "Elegir archivo para subir",
+        catalogRemove: "Eliminar",
+        catalogSizeError: "El catálogo debe ser de 10 MB o menos.",
+        catalogTypeError: "El catálogo debe ser un archivo PDF, XLSX, XLS, CSV o DOCX.",
         submit: "Enviar Solicitud",
         submitting: "Enviando...",
         requiredAsterisk: "*",
@@ -1077,6 +1101,7 @@ export const messages: Record<Locale, Messages> = {
       form: {
         firstName: "名字",
         lastName: "姓氏",
+        email: "电子邮箱",
         iAmA: "我是...",
         buyer: { title: "潜在客户", subtitle: "我想从 L&C 购买食品" },
         vendor: { title: "潜在供应商", subtitle: "我想把我的食品卖给 L&C" },
@@ -1098,6 +1123,13 @@ export const messages: Record<Locale, Messages> = {
           tradeShow: "贸易展 / 活动",
           other: "其他",
         },
+        catalogLabel: "产品目录",
+        catalogOptional: "选填",
+        catalogHint: "PDF、XLSX、XLS、CSV 或 DOCX，最大 10 MB。",
+        catalogChooseFile: "选择文件上传",
+        catalogRemove: "移除",
+        catalogSizeError: "目录文件必须在 10 MB 以内。",
+        catalogTypeError: "目录必须是 PDF、XLSX、XLS、CSV 或 DOCX 文件。",
         submit: "提交申请",
         submitting: "提交中...",
         requiredAsterisk: "*",

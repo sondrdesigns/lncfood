@@ -53,6 +53,11 @@ export default async function AdminDashboard() {
                   <Link href={`/admin/jobs/${j.id}`} className="hover:text-primary" style={{ fontWeight: 500 }}>
                     {j.title}
                   </Link>
+                  {j.branchSlug && (
+                    <span className="ml-2 inline-flex px-2 py-0.5 rounded text-xs bg-primary/10 text-primary" style={{ fontWeight: 600 }}>
+                      {j.branchSlug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-foreground/70">{j.location}</td>
                 <td className="px-6 py-4">

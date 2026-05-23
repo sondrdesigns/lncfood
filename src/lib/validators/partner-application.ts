@@ -21,6 +21,7 @@ export const partnerApplicationInputSchema = z.object({
     .min(1, "Last name is required")
     .max(80)
     .regex(/^[^\r\n]+$/, "Last name must be on a single line"),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
   businessName: z.string().trim().min(1, "Business name is required").max(160),
   cellPhone: phone,
   businessPhone: phone.optional(),

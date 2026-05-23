@@ -3,12 +3,29 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { CheckCircle2, Phone, MapPin, UtensilsCrossed, Truck, ArrowRight, ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, FileText, Phone, MapPin, UtensilsCrossed, Truck, ArrowRight, ArrowLeft, X } from "lucide-react";
 import { getBranchByZip } from "@/app/lib/territory";
 import type { Branch } from "@/app/data/locations";
 import { submitPartnerApplicationAction } from "@/lib/actions/partner-applications";
 import { useLocale } from "@/app/components/LocaleProvider";
+
+const CATALOG_MAX_BYTES = 10 * 1024 * 1024;
+const CATALOG_ACCEPT = ".pdf,.xlsx,.xls,.csv,.docx,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const CATALOG_ALLOWED_MIME = new Set([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const CATALOG_ALLOWED_EXT = /\.(pdf|xlsx|xls|csv|docx)$/i;
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 type CreditFormState = {
   businessLegalName: string;
@@ -55,6 +72,7 @@ export default function PartnerApplication() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
     interestType: "potential-customer",
     businessName: "",
     cellPhone: "",
@@ -67,6 +85,44 @@ export default function PartnerApplication() {
   });
   const [wantsCredit, setWantsCredit] = useState<boolean>(false);
   const [creditData, setCreditData] = useState<CreditFormState>(initialCreditState);
+
+  // Product catalog state (vendor only).
+  const catalogInputRef = useRef<HTMLInputElement>(null);
+  const [catalogFile, setCatalogFile] = useState<File | null>(null);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+
+  function handleCatalogChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setCatalogError(null);
+    if (!file) { setCatalogFile(null); return; }
+    if (file.size > CATALOG_MAX_BYTES) {
+      setCatalogError(t.partner.form.catalogSizeError);
+      setCatalogFile(null);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+      return;
+    }
+    if (file.type && !CATALOG_ALLOWED_MIME.has(file.type)) {
+      setCatalogError(t.partner.form.catalogTypeError);
+      setCatalogFile(null);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+      return;
+    }
+    if (!file.type && !CATALOG_ALLOWED_EXT.test(file.name)) {
+      setCatalogError(t.partner.form.catalogTypeError);
+      setCatalogFile(null);
+      if (catalogInputRef.current) catalogInputRef.current.value = "";
+      return;
+    }
+    setCatalogFile(file);
+  }
+
+  function clearCatalog() {
+    setCatalogFile(null);
+    setCatalogError(null);
+    if (catalogInputRef.current) catalogInputRef.current.value = "";
+  }
+
+  const catalogServerError = fieldErrors.productCatalog;
 
   // Buyers default-expand the credit section once they've chosen "buyer";
   // vendors stay collapsed.
@@ -355,7 +411,7 @@ export default function PartnerApplication() {
             variants={fadeInUp}
             className="bg-white rounded-3xl shadow-xl p-8 md:p-12"
           >
-            <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-8" noValidate encType="multipart/form-data">
               {/* Honeypot — bots fill this; real users don't see it. */}
               <div aria-hidden="true" className="hidden" tabIndex={-1}>
                 <label htmlFor="website">Website</label>
@@ -481,6 +537,28 @@ export default function PartnerApplication() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
                 />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label htmlFor="email" className="block mb-2 text-foreground">
+                  {t.partner.form.email} <span className="text-red-500">{t.partner.form.requiredAsterisk}</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  autoComplete="email"
+                  placeholder="you@yourbusiness.com"
+                  className="w-full px-4 py-3 bg-secondary rounded-xl border border-transparent focus:border-primary focus:outline-none transition-colors"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                />
+                {fieldErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+                )}
               </div>
 
               {/* Phone Numbers */}
@@ -909,6 +987,60 @@ export default function PartnerApplication() {
                   </motion.div>
                 )}
               </div>
+              )}
+
+              {/* Product catalog — vendors only */}
+              {formData.interestType === "potential-vendor" && (
+                <div className="pt-4 border-t border-border">
+                  <label className="block mb-1 text-foreground" style={{ fontWeight: 600 }}>
+                    {t.partner.form.catalogLabel}
+                    <span className="ml-1 text-foreground/50" style={{ fontWeight: 400 }}>({t.partner.form.catalogOptional})</span>
+                  </label>
+                  <p className="text-sm text-foreground/60 mb-3">{t.partner.form.catalogHint}</p>
+                  {catalogFile ? (
+                    <div
+                      className="flex items-center justify-between gap-3 px-4 py-3 bg-secondary border border-border rounded-xl"
+                      aria-live="polite"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <FileText className="w-5 h-5 text-primary shrink-0" />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm" style={{ fontWeight: 500 }}>{catalogFile.name}</p>
+                          <p className="text-xs text-foreground/60">{formatBytes(catalogFile.size)}</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearCatalog}
+                        className="inline-flex items-center gap-1 text-sm text-foreground/60 hover:text-red-600 transition-colors"
+                        aria-label={t.partner.form.catalogRemove}
+                      >
+                        <X className="w-4 h-4" />
+                        {t.partner.form.catalogRemove}
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      htmlFor="productCatalog"
+                      className="flex items-center gap-3 px-4 py-3 bg-secondary border border-dashed border-border rounded-xl hover:border-primary hover:bg-secondary/50 transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-5 h-5 text-foreground/50" />
+                      <span className="text-sm text-foreground/70">{t.partner.form.catalogChooseFile}</span>
+                    </label>
+                  )}
+                  <input
+                    ref={catalogInputRef}
+                    id="productCatalog"
+                    name="productCatalog"
+                    type="file"
+                    accept={CATALOG_ACCEPT}
+                    onChange={handleCatalogChange}
+                    className="sr-only"
+                  />
+                  {(catalogError || catalogServerError) && (
+                    <p className="mt-2 text-sm text-red-600">{catalogError ?? catalogServerError}</p>
+                  )}
+                </div>
               )}
 
               {/* Submit Button */}

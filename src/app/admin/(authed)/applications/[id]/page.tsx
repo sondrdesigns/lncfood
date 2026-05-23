@@ -5,11 +5,13 @@ import {
   Mail,
   Phone,
   Briefcase,
+  Building2,
   Calendar,
   Download,
   FileText,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { branches } from "@/app/data/locations";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -31,6 +33,12 @@ type Params = { id: string };
 export default async function AdminApplicationDetail({ params }: { params: Params }) {
   const found = await prisma.application.findUnique({ where: { id: params.id } });
   if (!found) notFound();
+
+  const branch = found.branchSlug
+    ? branches.find(
+        (b) => b.slug.toUpperCase().replace(/-/g, "_") === found.branchSlug,
+      ) ?? null
+    : null;
   const app =
     found.status === "NEW"
       ? await prisma.application.update({
@@ -106,6 +114,15 @@ export default async function AdminApplicationDetail({ params }: { params: Param
               </dd>
             </div>
           </div>
+          {branch && (
+            <div className="flex items-start gap-3">
+              <Building2 className="w-4 h-4 mt-1 text-primary shrink-0" />
+              <div>
+                <dt className="text-sm text-foreground/60">Branch</dt>
+                <dd style={{ fontWeight: 500 }}>L&C {branch.city} — {branch.address}</dd>
+              </div>
+            </div>
+          )}
           <div className="flex items-start gap-3">
             <Calendar className="w-4 h-4 mt-1 text-primary shrink-0" />
             <div>

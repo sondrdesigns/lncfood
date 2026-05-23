@@ -10,6 +10,7 @@ import {
   unarchiveJobAction,
   updateJobAction,
 } from "@/lib/actions/jobs";
+import type { BranchSlugEnum } from "@/lib/validators/job";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,7 @@ export default async function EditJobPage({
             description: job.description,
             requirements: job.requirements,
             published: job.published,
+            branchSlug: (job.branchSlug ?? undefined) as BranchSlugEnum | undefined,
           }}
           action={update}
           submitLabel="Save changes"

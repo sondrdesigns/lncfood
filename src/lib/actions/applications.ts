@@ -11,6 +11,7 @@ import {
   sendApplicantConfirmationEmail,
   sendApplicationNotificationEmail,
 } from "@/lib/email";
+import { branches } from "@/app/data/locations";
 
 export type ApplicationFormState = {
   error?: string;
@@ -146,16 +147,27 @@ export async function submitApplicationAction(
   }
 
   let jobId: string | null = null;
+  let jobBranchSlug: string | null = null;
   if (parsed.data.jobSlug) {
     const job = await prisma.job.findFirst({
       where: { slug: parsed.data.jobSlug, published: true, archivedAt: null },
-      select: { id: true, title: true },
+      select: { id: true, title: true, branchSlug: true },
     });
     if (job) {
       jobId = job.id;
       if (!parsed.data.jobTitle) parsed.data.jobTitle = job.title;
+      // Inherit branch from the job — don't trust client input for this.
+      jobBranchSlug = job.branchSlug ?? null;
     }
   }
+
+  // For a general (non-job) application, use the branch the applicant selected.
+  const resolvedBranchSlug = jobBranchSlug ?? parsed.data.branchSlug ?? null;
+
+  // Resolve the human-readable branch info for emails.
+  const branchInfo = resolvedBranchSlug
+    ? branches.find((b) => b.slug.toUpperCase().replace(/-/g, "_") === resolvedBranchSlug) ?? null
+    : null;
 
   await prisma.application.create({
     data: {
@@ -171,14 +183,15 @@ export async function submitApplicationAction(
       resumeFilename: resume?.filename ?? null,
       resumeSize: resume?.size ?? null,
       resumeMimeType: resume?.mimeType ?? null,
+      branchSlug: resolvedBranchSlug as Parameters<typeof prisma.application.create>[0]["data"]["branchSlug"],
     },
   });
 
   // Best-effort emails — log but don't block the redirect on email failure.
   try {
     await Promise.all([
-      sendApplicationNotificationEmail({ ...parsed.data, resume }),
-      sendApplicantConfirmationEmail(parsed.data),
+      sendApplicationNotificationEmail({ ...parsed.data, resume, branchInfo }),
+      sendApplicantConfirmationEmail({ ...parsed.data, branchInfo }),
     ]);
   } catch (e) {
     console.error("[applications] email send failed", e);

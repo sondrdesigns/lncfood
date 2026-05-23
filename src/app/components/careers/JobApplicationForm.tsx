@@ -30,9 +30,10 @@ function formatBytes(bytes: number) {
 type Props = {
   jobSlug: string;
   jobTitle: string;
+  branchLabel?: string; // e.g. "L&C San Jose"
 };
 
-export function JobApplicationForm({ jobSlug, jobTitle }: Props) {
+export function JobApplicationForm({ jobSlug, jobTitle, branchLabel }: Props) {
   const [state, action] = useFormState(submitApplicationAction, initialState);
   const errorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,6 +93,13 @@ export function JobApplicationForm({ jobSlug, jobTitle }: Props) {
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
+
+      {branchLabel && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl text-sm">
+          <span className="text-foreground/60">Applying to:</span>
+          <span className="text-primary" style={{ fontWeight: 600 }}>{branchLabel}</span>
+        </div>
+      )}
 
       {state.error && (
         <motion.div

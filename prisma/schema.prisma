@@ -19,21 +19,22 @@ model User {
 }
 
 model Job {
-  id           String    @id @default(cuid())
-  slug         String    @unique
+  id           String     @id @default(cuid())
+  slug         String     @unique
   title        String
   type         JobType
   location     String
   schedule     String
-  description  String    @db.Text
+  description  String     @db.Text
   requirements String[]
   applyUrl     String
-  published    Boolean   @default(false)
+  published    Boolean    @default(false)
   publishedAt  DateTime?
   archivedAt   DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   updatedById  String?
+  branchSlug   BranchSlug?
 
   @@index([published, archivedAt])
 }
@@ -45,8 +46,15 @@ enum JobType {
   ADMIN
 }
 
+enum BranchSlug {
+  SAN_DIEGO
+  LOS_ANGELES
+  FRESNO
+  SAN_JOSE
+}
+
 model Application {
-  id             String    @id @default(cuid())
+  id             String     @id @default(cuid())
   jobId          String?
   jobSlug        String?
   jobTitle       String?
@@ -54,18 +62,20 @@ model Application {
   lastName       String
   email          String
   phone          String
-  experience     String    @db.Text
+  experience     String     @db.Text
   resumeUrl      String?
   resumeFilename String?
   resumeSize     Int?
   resumeMimeType String?
-  status         AppStatus @default(NEW)
-  notes          String?   @db.Text
-  createdAt      DateTime  @default(now())
+  status         AppStatus  @default(NEW)
+  notes          String?    @db.Text
+  createdAt      DateTime   @default(now())
+  branchSlug     BranchSlug?
 
   @@index([createdAt])
   @@index([jobId])
   @@index([status])
+  @@index([branchSlug])
 }
 
 enum AppStatus {
@@ -80,6 +90,7 @@ model PartnerApplication {
   interestType  PartnerInterestType
   firstName     String
   lastName      String
+  email         String
   businessName  String
   cellPhone     String
   businessPhone String?
@@ -91,6 +102,12 @@ model PartnerApplication {
   status        AppStatus           @default(NEW)
   notes         String?             @db.Text
   createdAt     DateTime            @default(now())
+
+  // Product catalog upload (vendor applications only)
+  productCatalogUrl      String?
+  productCatalogFilename String?
+  productCatalogSize     Int?
+  productCatalogMimeType String?
 
   // Optional credit-application fields (set when the applicant opts to also
   // request net 30 credit terms on the same submission).

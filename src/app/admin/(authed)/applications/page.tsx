@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { branches } from "@/app/data/locations";
 
 export const dynamic = "force-dynamic";
+
+const branchCityBySlug = new Map(
+  branches.map((b) => [b.slug.toUpperCase().replace(/-/g, "_"), b.city]),
+);
 
 export default async function AdminApplicationsPage() {
   const applications = await prisma.application.findMany({
@@ -27,6 +32,7 @@ export default async function AdminApplicationsPage() {
             <tr>
               <th className="px-6 py-3" style={{ fontWeight: 600 }}>Applicant</th>
               <th className="px-6 py-3" style={{ fontWeight: 600 }}>Role</th>
+              <th className="px-6 py-3" style={{ fontWeight: 600 }}>Branch</th>
               <th className="px-6 py-3" style={{ fontWeight: 600 }}>Contact</th>
               <th className="px-6 py-3" style={{ fontWeight: 600 }}>Resume</th>
               <th className="px-6 py-3" style={{ fontWeight: 600 }}>Status</th>
@@ -37,7 +43,7 @@ export default async function AdminApplicationsPage() {
           <tbody>
             {applications.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-foreground/60">
+                <td colSpan={8} className="px-6 py-12 text-center text-foreground/60">
                   No applications yet.
                 </td>
               </tr>
@@ -55,6 +61,18 @@ export default async function AdminApplicationsPage() {
                 </td>
                 <td className="px-6 py-4 text-foreground/70">
                   {a.jobTitle ?? <span className="text-foreground/40">General</span>}
+                </td>
+                <td className="px-6 py-4">
+                  {a.branchSlug ? (
+                    <span
+                      className="inline-flex px-2 py-1 rounded-md text-xs bg-primary/10 text-primary"
+                      style={{ fontWeight: 600 }}
+                    >
+                      {branchCityBySlug.get(a.branchSlug) ?? a.branchSlug}
+                    </span>
+                  ) : (
+                    <span className="text-foreground/40 text-sm">—</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-foreground/70 text-sm">
                   <div>

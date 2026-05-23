@@ -26,6 +26,9 @@ function parseJobForm(fd: FormData) {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  const rawBranch = fd.get("branchSlug");
+  const branchSlug = typeof rawBranch === "string" && rawBranch !== "" ? rawBranch : undefined;
+
   return jobInputSchema.safeParse({
     title: fd.get("title") ?? "",
     type: fd.get("type") ?? "",
@@ -34,6 +37,7 @@ function parseJobForm(fd: FormData) {
     description: fd.get("description") ?? "",
     requirements,
     published: fd.get("published") === "on",
+    branchSlug,
   });
 }
 
@@ -78,6 +82,7 @@ export async function createJobAction(
       applyUrl: applyPathFor(slug),
       publishedAt: parsed.data.published ? new Date() : null,
       updatedById: user.id,
+      branchSlug: parsed.data.branchSlug ?? null,
     },
   });
 
@@ -110,6 +115,7 @@ export async function updateJobAction(
       publishedAt:
         parsed.data.published && !current.published ? new Date() : current.publishedAt,
       updatedById: user.id,
+      branchSlug: parsed.data.branchSlug ?? null,
     },
   });
 

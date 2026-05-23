@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Building2, Calendar, Landmark, MapPin, Phone, Search, FileText, UserCheck } from "lucide-react";
+import { ArrowLeft, Building2, Calendar, Download, Landmark, Mail, MapPin, Phone, Search, FileText, UserCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 function maskEin(ein: string): string {
   const digits = ein.replace(/\D/g, "");
@@ -94,6 +100,19 @@ export default async function AdminPartnerApplicationDetail({
               </div>
             </div>
           )}
+          {app.email && (
+            <div className="flex items-start gap-3 sm:col-span-2">
+              <Mail className="w-4 h-4 mt-1 text-primary shrink-0" />
+              <div>
+                <dt className="text-sm text-foreground/60">Email</dt>
+                <dd>
+                  <a href={`mailto:${app.email}`} className="hover:text-primary" style={{ fontWeight: 500 }}>
+                    {app.email}
+                  </a>
+                </dd>
+              </div>
+            </div>
+          )}
           <div className="flex items-start gap-3 sm:col-span-2">
             <Building2 className="w-4 h-4 mt-1 text-primary shrink-0" />
             <div>
@@ -123,6 +142,35 @@ export default async function AdminPartnerApplicationDetail({
             </div>
           </div>
         </dl>
+
+        {app.productCatalogUrl && (
+          <div className="mt-2 pt-6 border-t border-border">
+            <h2 className="text-lg mb-3" style={{ fontWeight: 600 }}>
+              Product catalog
+            </h2>
+            <a
+              href={`/admin/partner-applications/${app.id}/catalog`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-between gap-4 px-4 py-3 bg-secondary border border-border rounded-xl hover:border-primary transition-colors max-w-md"
+            >
+              <span className="flex items-center gap-3 min-w-0">
+                <FileText className="w-5 h-5 text-primary shrink-0" />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm" style={{ fontWeight: 500 }}>
+                    {app.productCatalogFilename ?? "catalog"}
+                  </span>
+                  <span className="block text-xs text-foreground/60">
+                    {app.productCatalogSize ? formatBytes(app.productCatalogSize) : ""}
+                    {app.productCatalogSize && app.productCatalogMimeType ? " · " : ""}
+                    {app.productCatalogMimeType ?? ""}
+                  </span>
+                </span>
+              </span>
+              <Download className="w-4 h-4 text-foreground/60 shrink-0" />
+            </a>
+          </div>
+        )}
 
         {app.creditAgreedAt && (
           <div className="mt-2 pt-6 border-t border-border">

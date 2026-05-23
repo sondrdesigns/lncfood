@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Briefcase, Clock, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { JobApplicationForm } from "@/app/components/careers/JobApplicationForm";
+import { branches } from "@/app/data/locations";
 
 export const revalidate = 60;
 
@@ -12,7 +13,7 @@ type Params = { slug: string };
 const getApplyJob = cache(async (slug: string) =>
   prisma.job.findFirst({
     where: { slug, published: true, archivedAt: null },
-    select: { slug: true, title: true, type: true, location: true, schedule: true },
+    select: { slug: true, title: true, type: true, location: true, schedule: true, branchSlug: true },
   }),
 );
 
@@ -27,6 +28,13 @@ export async function generateMetadata({ params }: { params: Params }) {
 export default async function ApplyPage({ params }: { params: Params }) {
   const job = await getApplyJob(params.slug);
   if (!job) notFound();
+
+  const branch = job.branchSlug
+    ? branches.find(
+        (b) => b.slug.toUpperCase().replace(/-/g, "_") === job.branchSlug,
+      ) ?? null
+    : null;
+  const branchLabel = branch ? `L&C ${branch.city}` : undefined;
 
   return (
     <div className="pt-20">
@@ -75,7 +83,7 @@ export default async function ApplyPage({ params }: { params: Params }) {
             <p className="text-foreground/70 mb-8">
               Fill out the form below. We'll review and get back to you shortly.
             </p>
-            <JobApplicationForm jobSlug={job.slug} jobTitle={job.title} />
+            <JobApplicationForm jobSlug={job.slug} jobTitle={job.title} branchLabel={branchLabel} />
           </div>
         </div>
       </section>

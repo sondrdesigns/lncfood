@@ -1,10 +1,11 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Briefcase, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, Briefcase, Building2, Clock, MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { JsonLd } from "@/lib/seo/JsonLdScript";
 import { jobPostingLd } from "@/lib/seo/jsonld";
+import { branches } from "@/app/data/locations";
 
 export const revalidate = 60;
 
@@ -28,6 +29,12 @@ export async function generateMetadata({ params }: { params: Params }) {
 export default async function JobDetailPage({ params }: { params: Params }) {
   const job = await getJob(params.slug);
   if (!job) notFound();
+
+  const branch = job.branchSlug
+    ? branches.find(
+        (b) => b.slug.toUpperCase().replace(/-/g, "_") === job.branchSlug,
+      ) ?? null
+    : null;
 
   return (
     <div className="pt-20">
@@ -58,6 +65,12 @@ export default async function JobDetailPage({ params }: { params: Params }) {
               <Briefcase className="w-4 h-4" />
               {job.type.toLowerCase()}
             </span>
+            {branch && (
+              <span className="inline-flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                L&amp;C {branch.city}
+              </span>
+            )}
           </div>
         </div>
       </section>

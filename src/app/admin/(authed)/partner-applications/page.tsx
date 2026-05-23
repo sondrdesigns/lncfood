@@ -65,6 +65,15 @@ export default async function AdminPartnerApplicationsPage() {
                         Credit
                       </span>
                     )}
+                    {a.productCatalogUrl && (
+                      <span
+                        className="inline-flex px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 border border-blue-200"
+                        style={{ fontWeight: 600 }}
+                        title="Product catalog attached"
+                      >
+                        Catalog
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-foreground/70 text-sm">

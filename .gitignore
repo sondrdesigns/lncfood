@@ -11,3 +11,11 @@ dist
 .env*.local
 
 scripts/refs
+
+# Local scratch notes and editor workspace
+agents.md
+claudeguide.md
+revisions.md
+security-audit.md
+todo.md
+*.code-workspace

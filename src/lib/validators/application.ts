@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { branchSlugEnum } from "@/lib/validators/job";
 
 export const applicationInputSchema = z.object({
   firstName: z
@@ -27,6 +28,7 @@ export const applicationInputSchema = z.object({
     .max(5000, "Keep this under 5000 characters"),
   jobSlug: z.string().trim().max(120).optional(),
   jobTitle: z.string().trim().max(160).optional(),
+  branchSlug: branchSlugEnum.optional(),
 });
 
 export type ApplicationInput = z.infer<typeof applicationInputSchema>;
