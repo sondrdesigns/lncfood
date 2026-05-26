@@ -2,12 +2,22 @@ import { Resend } from "resend";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const FROM = process.env.EMAIL_FROM ?? "L&C Careers <studio@sondrdesigns.com>";
-const NOTIFY_TO = process.env.EMAIL_NOTIFY_TO ?? "aizen@sondrdesigns.com";
+
+// EMAIL_NOTIFY_TO accepts either a single address or a comma-separated list,
+// so admin notifications can fan out to multiple inboxes (e.g. client + dev).
+function parseRecipients(raw: string): string | string[] {
+  const list = raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list.length > 1 ? list : (list[0] ?? "");
+}
+const NOTIFY_TO = parseRecipients(process.env.EMAIL_NOTIFY_TO ?? "aizen@sondrdesigns.com");
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 type SendArgs = {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   replyTo?: string;
