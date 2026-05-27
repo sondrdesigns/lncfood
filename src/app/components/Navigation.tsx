@@ -127,6 +127,7 @@ export default function Navigation() {
   };
 
   return (
+    <>
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -244,6 +245,7 @@ export default function Navigation() {
           </button>
         </div>
       </div>
+    </motion.nav>
 
       <AnimatePresence>
         {mobileOpen && (
@@ -269,7 +271,7 @@ export default function Navigation() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-              className="md:hidden fixed top-0 right-0 bottom-0 w-[80vw] max-w-[360px] bg-white shadow-2xl z-[60] flex flex-col"
+              className="md:hidden fixed top-0 right-0 bottom-0 w-full bg-white shadow-2xl z-[60] flex flex-col"
             >
               <div className="px-6 pt-6 pb-3 flex items-center justify-between gap-3">
                 <span
@@ -327,6 +329,6 @@ export default function Navigation() {
           </>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </>
   );
 }
