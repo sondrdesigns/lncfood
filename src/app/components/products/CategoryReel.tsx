@@ -30,15 +30,12 @@ export function CategoryReel() {
     target: sectionRef,
     offset: ["start start", "end end"],
   });
-  // Snap raw scroll progress to the nearest discrete panel stop, then ease via spring.
-  // Each ~one-panel chunk of vertical scroll triggers a single decisive horizontal swipe.
-  const snapped = useTransform(scrollYProgress, (v) =>
-    Math.round(v * (PANELS - 1)) / (PANELS - 1),
-  );
-  const smoothed = useSpring(snapped, {
-    stiffness: 220,
-    damping: 30,
-    mass: 0.6,
+  // Keep the reel tied to scroll position, but soften the follow-through so
+  // trackpads and faster wheels do not produce abrupt panel jumps.
+  const smoothed = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 28,
+    mass: 1.1,
   });
   const xPct = useTransform(smoothed, [0, 1], ["0%", `-${(PANELS - 1) * (100 / PANELS)}%`]);
 
@@ -136,7 +133,7 @@ function ReelPanel({
           className="self-start inline-flex items-center gap-2 text-white border-b border-white/40 hover:border-white pb-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-sm"
           style={{ fontWeight: 600 }}
         >
-          Browse {category.items.length} products
+          Browse {category.items.length} categories
           <ArrowRight className="w-4 h-4" />
         </button>
       </motion.div>
@@ -224,7 +221,7 @@ function VerticalPanel({
           className="self-start inline-flex items-center gap-2 text-white border-b border-white/40 hover:border-white pb-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-sm"
           style={{ fontWeight: 600 }}
         >
-          Browse {category.items.length} products
+          Browse {category.items.length} categories
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

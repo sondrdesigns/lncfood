@@ -5,6 +5,7 @@ export const metadata = {
   title: "Customer Portal — Coming Soon | L&C Food Distribution",
   description:
     "A customer login and online ordering portal is on the way. In the meantime, contact us directly to place orders or get account help.",
+  robots: { index: false },
 };
 
 export default function CustomerLoginPage() {

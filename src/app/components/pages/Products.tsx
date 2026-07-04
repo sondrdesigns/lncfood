@@ -17,8 +17,13 @@ import Image from "next/image";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { categories } from "@/app/data/categories";
 import { useCases, type UseCaseIcon } from "@/app/data/useCases";
-import { CategoryDetail } from "@/app/components/products/CategoryDetail";
+import dynamic from "next/dynamic";
 import { CategoryReel } from "@/app/components/products/CategoryReel";
+
+const CategoryDetail = dynamic(
+  () => import("@/app/components/products/CategoryDetail").then((m) => m.CategoryDetail),
+  { ssr: false }
+);
 import {
   BobaCupIcon,
   PhoBowlIcon,
@@ -26,7 +31,6 @@ import {
   WokIcon,
 } from "@/app/components/products/UseCaseIcons";
 import { ScrollProgress } from "@/app/components/motion/ScrollProgress";
-import { SplitWords } from "@/app/components/motion/SplitWords";
 import { CountUp } from "@/app/components/motion/CountUp";
 import { usePrefersReducedMotion } from "@/app/hooks/usePrefersReducedMotion";
 import { useLocale } from "@/app/components/LocaleProvider";
@@ -204,12 +208,15 @@ export default function Products() {
             </span>
           </motion.div>
 
-          <h1
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mb-6 leading-[1.15] sm:leading-[1.1]"
             style={{ fontWeight: 700 }}
           >
-            <SplitWords text={t.products.hero.title} />
-          </h1>
+            {t.products.hero.title}
+          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -625,13 +632,6 @@ function UseCaseCard({ useCase }: { useCase: (typeof useCases)[number] }) {
   const prm = usePrefersReducedMotion();
   const { t } = useLocale();
   const Icon = useCaseIconMap[useCase.icon];
-  const onClickFooter = () => {
-    if (useCase.linkedCategorySlug) {
-      window.dispatchEvent(
-        new CustomEvent("category:open", { detail: useCase.linkedCategorySlug }),
-      );
-    }
-  };
   return (
     <motion.div
       variants={useCaseCardVariants}
@@ -676,17 +676,6 @@ function UseCaseCard({ useCase }: { useCase: (typeof useCases)[number] }) {
           ))}
         </motion.ul>
 
-        {useCase.linkedCategorySlug && (
-          <button
-            type="button"
-            onClick={onClickFooter}
-            className="mt-auto self-start inline-flex items-center gap-2 text-primary text-sm hover:gap-3 transition-all focus:outline-none focus-visible:underline"
-            style={{ fontWeight: 600 }}
-          >
-            {t.products.useCases.seeFullCatalog}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
       </motion.div>
     </motion.div>
   );

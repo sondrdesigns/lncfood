@@ -1,7 +1,7 @@
 import { branches, type Branch } from "@/app/data/locations";
 
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lncfood.com"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lncfood.com"
 ).replace(/\/$/, "");
 
 export const absoluteUrl = (path: string) =>
@@ -42,10 +42,12 @@ export const organizationLd = () => ({
   name: COMPANY_NAME,
   legalName: COMPANY_LEGAL,
   url: SITE_URL,
-  logo: COMPANY_LOGO,
+  logo: { "@type": "ImageObject", url: COMPANY_LOGO },
   email: COMPANY_EMAIL,
+  telephone: "(619) 710-2030",
   description: COMPANY_DESCRIPTION,
   foundingDate: COMPANY_FOUNDED,
+  foundingLocation: { "@type": "Place", name: "San Diego, California" },
   areaServed: branches.map((b) => b.city),
   location: branches.map(branchToPlace),
 });
@@ -54,15 +56,18 @@ export const localBusinessLd = (b: Branch) => {
   const place = branchToPlace(b);
   return {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "WholesaleStore",
     "@id": `${SITE_URL}/locations/${b.slug}#localbusiness`,
     name: `${COMPANY_NAME} — ${b.city}`,
     parentOrganization: { "@id": `${SITE_URL}#organization` },
     url: absoluteUrl(`/locations/${b.slug}`),
-    image: COMPANY_LOGO,
+    image: { "@type": "ImageObject", url: b.image ? absoluteUrl(b.image) : COMPANY_LOGO },
     address: place.address,
     telephone: b.phone,
     email: COMPANY_EMAIL,
+    ...(b.lat && b.lng
+      ? { geo: { "@type": "GeoCoordinates", latitude: b.lat, longitude: b.lng } }
+      : {}),
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
@@ -149,7 +154,7 @@ export const jobPostingLd = (job: JobLike) => {
       "@id": `${SITE_URL}#organization`,
       name: COMPANY_NAME,
       sameAs: SITE_URL,
-      logo: COMPANY_LOGO,
+      logo: { "@type": "ImageObject", url: COMPANY_LOGO },
     },
     jobLocation,
     url: absoluteUrl(`/careers/${job.slug}`),
@@ -159,3 +164,23 @@ export const jobPostingLd = (job: JobLike) => {
     },
   };
 };
+
+export const websiteLd = () => ({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}#website`,
+  url: SITE_URL,
+  name: COMPANY_NAME,
+  publisher: { "@id": `${SITE_URL}#organization` },
+  inLanguage: ["en", "zh"],
+});
+
+export const faqPageLd = (faqs: { question: string; answer: string }[]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map(({ question, answer }) => ({
+    "@type": "Question",
+    name: question,
+    acceptedAnswer: { "@type": "Answer", text: answer },
+  })),
+});

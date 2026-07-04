@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "@/styles/index.css";
 import { JsonLd } from "@/lib/seo/JsonLdScript";
-import { organizationLd, SITE_URL } from "@/lib/seo/jsonld";
+import { organizationLd, websiteLd, SITE_URL } from "@/lib/seo/jsonld";
 import { Analytics } from "@vercel/analytics/next"
 
 const dmSans = DM_Sans({
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: "L&C Food Distribution",
     description:
       "L&C Food Distribution — your trusted Asian food distribution partner since 1995. Global Foods, Local Solutions.",
-    images: ["/images/lnc-logo.png"],
+    images: [{ url: "/images/home-hero.webp", width: 1200, height: 630 }],
     type: "website",
   },
 };
@@ -55,6 +55,7 @@ export default function RootLayout({
     <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
       <body>
         <JsonLd data={organizationLd()} />
+        <JsonLd data={websiteLd()} />
         {children}
         <Analytics />
       </body>

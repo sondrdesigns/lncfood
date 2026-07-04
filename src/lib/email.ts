@@ -153,7 +153,7 @@ export async function sendPartnerApplicationNotificationEmail(app: PartnerApplic
   const row = (label: string, value: string) =>
     `<tr><td style="padding:8px 0; color:#666; width: 200px;">${escape(label)}</td><td style="padding:8px 0;">${value}</td></tr>`;
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lncfood.com";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lncfood.com";
 
   const partnerRows = [
     row("Interest", escape(interest)),
@@ -223,7 +223,7 @@ export async function sendApplicantConfirmationEmail(app: Application) {
       </p>
       <p style="font-size: 13px; color: #666; margin-top: 32px;">
         — The L&amp;C Food team<br>
-        <a href="https://lncfood.com" style="color: #2D5F3E;">lncfood.com</a>
+        <a href="https://www.lncfood.com" style="color: #2D5F3E;">lncfood.com</a>
       </p>
     </div>
   `;
@@ -266,7 +266,7 @@ export async function sendPartnerApplicantConfirmationEmail(app: PartnerConfirma
       </p>
       <p style="font-size: 13px; color: #666; margin-top: 32px;">
         — The L&amp;C Food Distribution team<br>
-        <a href="https://lncfood.com" style="color: #2D5F3E;">lncfood.com</a>
+        <a href="https://www.lncfood.com" style="color: #2D5F3E;">lncfood.com</a>
       </p>
     </div>
   `;

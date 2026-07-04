@@ -45,6 +45,7 @@ export async function GET(_request: Request, { params }: { params: Params }) {
     headers.set("content-length", String(blob.blob.size));
   }
   headers.set("cache-control", "private, no-store");
+  headers.set("x-content-type-options", "nosniff");
 
   return new Response(blob.stream, { headers });
 }

@@ -6,6 +6,8 @@ export type Branch = {
   address: string;
   phone: string;
   image?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export const branches: Branch[] = [
@@ -15,20 +17,24 @@ export const branches: Branch[] = [
     address: "8724 Approach Rd, San Diego, CA 92154",
     phone: "(619) 710-2030",
     image: "/images/locations/enhanced/san-diego-hero.jpeg",
+    lat: 32.5726,
+    lng: -116.9708,
   },
   {
     slug: "los-angeles",
     city: "Los Angeles",
     address: "15320 Salt Lake Ave, City of Industry, CA 91745",
     phone: "(626) 465-7855",
-    // TODO: add a Los Angeles warehouse photo when available
+    lat: 34.0179,
+    lng: -117.9335,
   },
   {
     slug: "fresno",
     city: "Fresno",
     address: "471 S Teilman Ave, Fresno, CA 93706",
     phone: "(559) 264-0298",
-    // TODO: add a Fresno warehouse photo when available
+    lat: 36.735,
+    lng: -119.7964,
   },
   {
     slug: "san-jose",
@@ -36,6 +42,8 @@ export const branches: Branch[] = [
     address: "1309 Old Bayshore Hwy, San Jose, CA 95112",
     phone: "(408) 998-8211",
     image: "/images/locations/enhanced/san-jose-hero.jpeg",
+    lat: 37.357,
+    lng: -121.8983,
   },
 ];
 

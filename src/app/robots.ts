@@ -3,11 +3,13 @@ import { SITE_URL } from "@/lib/seo/jsonld";
 
 const AI_CRAWLERS = [
   "GPTBot",
+  "OAI-SearchBot",
   "ClaudeBot",
   "PerplexityBot",
   "Google-Extended",
   "CCBot",
   "Applebot-Extended",
+  "Bytespider",
 ];
 
 export default function robots(): MetadataRoute.Robots {
