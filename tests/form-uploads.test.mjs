@@ -157,6 +157,13 @@ async function getAuthed(pathname) {
   return { status: res.status, html };
 }
 
+async function fetchAuthed(pathname) {
+  return fetch(BASE + pathname, {
+    headers: adminCookies ? { Cookie: adminCookies } : {},
+    redirect: "manual",
+  });
+}
+
 // ---------- lifecycle ----------
 
 before(async () => {
@@ -409,6 +416,23 @@ test("HTTP: admin applications list renders our test resume row", async (t) => {
   assert.match(html, /\/admin\/applications\/[^"]+\/resume/);
 });
 
+test("HTTP: admin resume download streams the private blob", async (t) => {
+  if (!adminCookies) {
+    t.skip("admin sign-in unavailable");
+    return;
+  }
+  const app = await prisma.application.findFirst({
+    where: { email: `applicant.${RUN_TAG}@${TEST_EMAIL_DOMAIN}` },
+  });
+  assert.ok(app, "application row should exist for resume download check");
+
+  const res = await fetchAuthed(`/admin/applications/${app.id}/resume`);
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type") ?? "", /application\/pdf/);
+  assert.match(res.headers.get("content-disposition") ?? "", /test-resume\.pdf/);
+  const body = Buffer.from(await res.arrayBuffer()).toString("utf8");
+  assert.match(body, /^%PDF-1\.4/);
+});
 test("HTTP: admin partner-applications list renders both vendor and buyer rows", async (t) => {
   if (!adminCookies) {
     t.skip("admin sign-in unavailable");
@@ -449,6 +473,12 @@ test("HTTP: admin partner-application detail renders credit + catalog metadata",
   assert.match(vendorPage.html, /test-catalog\.pdf/, "vendor detail should show catalog filename");
   assert.match(vendorPage.html, /catalog/i);
 
+  const catalogRes = await fetchAuthed(`/admin/partner-applications/${vendor.id}/catalog`);
+  assert.equal(catalogRes.status, 200);
+  assert.match(catalogRes.headers.get("content-type") ?? "", /application\/pdf/);
+  assert.match(catalogRes.headers.get("content-disposition") ?? "", /test-catalog\.pdf/);
+  const catalogBody = Buffer.from(await catalogRes.arrayBuffer()).toString("utf8");
+  assert.match(catalogBody, /^%PDF-1\.4/);
   const buyerPage = await getAuthed(`/admin/partner-applications/${buyer.id}`);
   assert.equal(buyerPage.status, 200);
   assert.match(buyerPage.html, /First National Test Bank/, "buyer detail should show bank name");

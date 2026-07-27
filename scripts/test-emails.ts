@@ -52,6 +52,7 @@ const fakeApplication = {
     filename: "fake-resume.pdf",
     size: 123_456,
     mimeType: "application/pdf",
+    adminId: "test-id-application",
   },
 };
 

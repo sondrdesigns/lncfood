@@ -75,6 +75,7 @@ type Application = {
     filename: string;
     size: number;
     mimeType: string;
+    adminId: string;
   } | null;
 };
 
@@ -82,8 +83,12 @@ export async function sendApplicationNotificationEmail(app: Application) {
   const fullName = `${app.firstName} ${app.lastName}`.trim();
   const role = app.jobTitle ?? "General application";
   const resume = app.resume ?? null;
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lncfood.com";
+  const resumeHref = resume
+    ? `${SITE_URL}/admin/applications/${resume.adminId}/resume`
+    : "";
   const resumeRow = resume
-    ? `<tr><td style="padding:8px 0; color:#666;">Resume</td><td style="padding:8px 0;"><a href="${escape(resume.url)}">${escape(resume.filename)}</a> <span style="color:#999;">(${(resume.size / 1024).toFixed(0)} KB)</span></td></tr>`
+    ? `<tr><td style="padding:8px 0; color:#666;">Resume</td><td style="padding:8px 0;"><a href="${escape(resumeHref)}">${escape(resume.filename)}</a> <span style="color:#999;">(${(resume.size / 1024).toFixed(0)} KB)</span></td></tr>`
     : "";
   const branchRow = app.branchInfo
     ? `<tr><td style="padding:8px 0; color:#666;">Branch</td><td style="padding:8px 0;">${escape(`L&C ${app.branchInfo.city} — ${app.branchInfo.address}`)}</td></tr>`

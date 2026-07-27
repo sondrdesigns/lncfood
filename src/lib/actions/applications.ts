@@ -169,7 +169,7 @@ export async function submitApplicationAction(
     ? branches.find((b) => b.slug.toUpperCase().replace(/-/g, "_") === resolvedBranchSlug) ?? null
     : null;
 
-  await prisma.application.create({
+  const app = await prisma.application.create({
     data: {
       jobId,
       jobSlug: parsed.data.jobSlug ?? null,
@@ -190,7 +190,11 @@ export async function submitApplicationAction(
   // Best-effort emails — log but don't block the redirect on email failure.
   try {
     await Promise.all([
-      sendApplicationNotificationEmail({ ...parsed.data, resume, branchInfo }),
+      sendApplicationNotificationEmail({
+        ...parsed.data,
+        resume: resume ? { ...resume, adminId: app.id } : null,
+        branchInfo,
+      }),
       sendApplicantConfirmationEmail({ ...parsed.data, branchInfo }),
     ]);
   } catch (e) {
