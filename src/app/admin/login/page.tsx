@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
@@ -23,7 +23,6 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const sp = useSearchParams();
   const callbackUrl = sp.get("callbackUrl") ?? "/admin";
 
@@ -50,8 +49,7 @@ function LoginForm() {
         }
         return;
       }
-      router.push(callbackUrl);
-      router.refresh();
+      window.location.href = callbackUrl;
     });
   }
 
